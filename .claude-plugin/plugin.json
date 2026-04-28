@@ -1,0 +1,31 @@
+{
+  "name": "garage",
+  "version": "1.0.0",
+  "description": "Five-skill engineering pod for the full lifecycle: brainstorm direction, generate variants, implement, verify visually. Spec-driven, with hard handoffs between skills that prevent silent assumptions.",
+  "author": {
+    "name": "Saurav Varma",
+    "url": "https://github.com/sauravvarma"
+  },
+  "homepage": "https://github.com/sauravvarma/garage",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sauravvarma/garage.git"
+  },
+  "license": "MIT",
+  "keywords": [
+    "spec-driven",
+    "design-system",
+    "engineering-workflow",
+    "lifecycle",
+    "pencil",
+    "playwright",
+    "visual-qa"
+  ],
+  "skills": [
+    "spec-first-project-setup",
+    "design-explore",
+    "design-agent",
+    "code-agent",
+    "visual-qa"
+  ]
+}
