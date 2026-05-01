@@ -51,3 +51,31 @@ Architectural patterns, philosophy, and institutional knowledge for this project
 <!-- Module system: CSS modules, BEM, scoped styles? -->
 <!-- Token/variable files: where do shared values live? -->
 <!-- Rule: all visual values must trace to tokens — no orphan hex/px values. -->
+<!-- If tokens are auto-injected by sass-loader / style-loader, document that — engineers shouldn't @import them manually. -->
+<!-- If feature-scoped CSS custom properties are allowed for unmapped values, document the policy and the graduation path to global tokens. -->
+
+## Framework notes
+
+<!-- Repo-specific framework gotchas with prescribed recovery. -->
+<!-- Add to this section when something bites you — never write down a symptom without writing down the fix or the procedure to find it. -->
+<!-- /code-agent populates this as it discovers framework issues during implementation. -->
+<!-- Example heading — replace with real entries: -->
+<!-- ### <FrameworkName> <issue title> -->
+<!-- **Symptom:** ... -->
+<!-- **What's already wired correctly:** ... (so the next reader doesn't waste time on the wrong hypothesis) -->
+<!-- **Most common actual cause:** ... -->
+<!-- **Recovery procedure:** numbered steps. -->
+
+## Environment
+
+<!-- Per-engineer machine setup. Local config files, secrets, env vars, dev server quirks. -->
+<!-- Repo-specific only — global tooling notes belong elsewhere. -->
+<!-- Document any gitignored files that the dev server needs (e.g. config.json, .env), where to source them, and the failure mode if missing. -->
+
+## Mock-driven development
+
+<!-- If this project uses checked-in API mocks (typically under docs/mocks/), document: -->
+<!-- - Where they live and how they map to real endpoints. -->
+<!-- - How they're loaded into the dev environment (e.g. parsed at module load and seeded into reducer initialState). -->
+<!-- - The policy for keeping them in sync with the real API. -->
+<!-- - Whether a TODO: API marker convention is in use to flag synthesised fields the backend should ship. -->

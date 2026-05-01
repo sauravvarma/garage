@@ -26,5 +26,19 @@
 ## Grid / layout system (if applicable)
 <!-- Breakpoints, cell sizing, responsive rules -->
 
+## API response shape
+
+<!-- Filled in by /spec-first-project-setup Step 2 if mocks were provided. -->
+<!-- If empty, /code-agent will populate this when first reading the API response. -->
+
+## Parser implementation
+
+<!-- /code-agent populates this as patterns emerge during implementation. -->
+<!-- Examples of what belongs here: -->
+<!-- - Field-mapping conventions specific to this feature -->
+<!-- - Status / category derivation rules from the response -->
+<!-- - Widget-bag → widgetsByType map pattern (when responses are arrays of typed widgets) -->
+<!-- - Synthesised fields with TODO: API markers — list them so the team knows what to ship from the backend -->
+
 ## Next steps
 <!-- What to try in the design tool, what to implement first -->

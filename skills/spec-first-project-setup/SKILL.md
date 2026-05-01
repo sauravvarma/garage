@@ -143,7 +143,11 @@ Copy `assets/templates/design-taxonomy.md` to `docs/DESIGN-TAXONOMY.md`. The tem
 
 ### 9. Create feature idea docs
 
-For each feature/page the user listed in Step 1, copy `assets/templates/feature-ideas.md` to `docs/[FEATURE]-IDEAS.md`. Substitute `[Feature]` with the feature name. The template includes the route chrome section so the AI always has full route context (header, footer, layout) — not just the main content area. The decisions table includes a `Type` column (`direction` / `variant`) which `/design-agent` and `/code-agent` watch for to pick the right routing on open decisions.
+For each feature/page the user listed in Step 1, copy `assets/templates/feature-ideas.md` to `docs/[FEATURE]-IDEAS.md`. Substitute `[Feature]` with the feature name. The template includes:
+- The route chrome section so the AI always has full route context (header, footer, layout) — not just the main content area.
+- The decisions table with a `Type` column (`direction` / `variant`) which `/design-agent` and `/code-agent` watch to pick the right routing on open decisions.
+- An **"API response shape"** section header (filled in by Step 2 if mocks were provided).
+- A **"Parser implementation"** section header (placeholder — `/code-agent` populates it as patterns are discovered while implementing the feature).
 
 ### 10. Create `docs/REPO-CONVENTIONS.md`
 
@@ -153,10 +157,12 @@ This doc captures architectural patterns, routing philosophy, state management c
 
 - **Routing**: central link/navigation wrapper? How does the app decide between client-side navigation and full page loads? (Look for `Link` imports, route config, navigation utilities.)
 - **Data flow**: How does API data reach components? Parser/transformer layer? State management library? (Look for parser.js files, Redux/Zustand setup, thunks/sagas.)
-- **Code splitting**: How are pages loaded? Lazy loading, SSR, or client-only? (Look for `loadable`, `lazy`, dynamic imports.)
+- **Code splitting**: How are pages loaded? Lazy loading, SSR, or client-only? (Look for `loadable`, `lazy`, dynamic imports.) **Note any SSR/hydration setup** (e.g. `loadableReady`, `ChunkExtractor`) — these are common sources of framework gotchas worth pre-documenting.
 - **Analytics**: How do tracking events flow? API-driven or hardcoded? Shared tracking utility? (Look for ga_data patterns, tracking.js, analytics libraries.)
 - **Asset handling**: How are images, icons, static files resolved? (Look for asset utilities, CDN config, public directories.)
-- **Styling**: CSS architecture? Modules, tokens, variables, preprocessors? (Look for shared SCSS/CSS files, theme config.)
+- **Styling**: CSS architecture? Modules, tokens, variables, preprocessors? (Look for shared SCSS/CSS files, theme config.) **Check whether tokens are auto-injected by sass-loader / style-loader** (common in catalyst-core / CRA-style setups) — if yes, document so engineers don't waste time `@import`ing them.
+- **Environment / setup**: are there per-engineer files (e.g. local config, `.env`) that aren't in git? Document the bootstrap procedure.
+- **Framework gotchas**: known issues with the framework that bite during development — leave a section heading even if empty so `/code-agent` knows where to write findings.
 
 If the codebase is new/empty, copy the template as-is. If it's an existing codebase, copy the template and seed the sections from your investigation, leaving placeholders for what you couldn't discover.
 
