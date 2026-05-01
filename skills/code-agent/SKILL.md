@@ -46,6 +46,8 @@ To match the user's task to its `[FEATURE]-IDEAS.md`, use the closest filename m
     - Attempt 2 — what you tried next, what new hypothesis it tested, why that failed
     - What you'd want the user's call on (approach change, deeper investigation, pause)
   Not a retry log. A thinking-aloud note that gives the user enough to redirect.
+- When you discover a framework issue or repo-specific gotcha while implementing, write the actual fix or recovery procedure into the appropriate doc (typically `docs/REPO-CONVENTIONS.md` → `## Framework notes`). "Known issue, the framework recovers" / "watch out for X" are not acceptable — either prescribe what to do or escalate. The bar is: the next reader can follow your note and resolve the issue without re-deriving it.
+- **Working in a git worktree of a node project**: the worktree has no `node_modules` of its own. Two options — install fresh (slow but isolated) or symlink from the main checkout (`ln -sfn /<main>/node_modules /<worktree>/node_modules`). The symlink is faster but watch processes can resolve through the symlink and end up watching the main repo's source instead of the worktree's. Symptom: edits don't trigger rebuilds, routes 404 because the bundle was built before your files existed. Fix: `pkill` the dev-server processes and restart from the worktree directory. If the user is in a worktree and the dev server misbehaves, check this first.
 
 ## Input discipline
 
@@ -76,6 +78,10 @@ To match the user's task to its `[FEATURE]-IDEAS.md`, use the closest filename m
 - Parsers are the boundary between API semantics and frontend semantics. They deliberately reshape.
 - Never use `keysToCamel` or any bulk transformer as a substitute for explicit field mapping.
 - Every field the frontend reads is explicitly parsed, so backend renames break loudly instead of silently.
+- **API data takes precedence over hardcoded values, always.** When a label, count, color, or any displayable value is present in the response, render it from the response. Don't keep a fallback string in the component — defaults belong in the API.
+- **When the backend is missing a field the UI needs**, synthesise inside the parser and tag the synthesis site with `// TODO: API — <field-name-the-backend-should-ship>`. The marker dies when the field ships; bare synthesis without a TODO does not.
+- **Cross-source data joins are debt, not architecture.** If the only way to get a field is to look it up by name from a sibling widget/endpoint, do it — and mark it with a `DEBT` comment plus a `TODO: API` so the workaround is loud, not normalised. Never generalise the join into a "pattern."
+- **Mock-driven reducer pattern (migration mode).** When seeding a reducer from a checked-in mock during a backend-not-ready phase: parse the mock at module load, store the parsed shape in `initialState.data`, and write the thunk so swapping in a real API call is a one-block restoration. Mark the thunk with a `TODO: API` describing the call to make.
 
 **Design-code contract.**
 - Material change (layout, structure, content) → update the design comp and mark tracking synced.
