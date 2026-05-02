@@ -7,10 +7,6 @@
     "url": "https://github.com/sauravvarma"
   },
   "homepage": "https://github.com/sauravvarma/garage",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/sauravvarma/garage.git"
-  },
   "license": "MIT",
   "keywords": [
     "spec-driven",
@@ -19,13 +15,6 @@
     "lifecycle",
     "pencil",
     "playwright",
-    "visual-qa"
-  ],
-  "skills": [
-    "spec-first-project-setup",
-    "design-explore",
-    "design-agent",
-    "code-agent",
     "visual-qa"
   ]
 }
