@@ -1,0 +1,14 @@
+{
+  "name": "garage",
+  "owner": {
+    "name": "Saurav Varma",
+    "url": "https://github.com/sauravvarma"
+  },
+  "plugins": [
+    {
+      "name": "garage",
+      "description": "Five-skill engineering pod for the full lifecycle: brainstorm direction, generate variants, implement, verify visually.",
+      "source": "./"
+    }
+  ]
+}
