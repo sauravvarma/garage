@@ -45,8 +45,9 @@ All knowledge is embedded in `references/`:
 - `references/design-traditions.md` — cross-domain inspiration catalog (10 traditions)
 - `references/exploration-techniques.md` — divergent methods, sensory vocabulary, genre subversion (7 techniques)
 - `references/direction-critique.md` — lightweight 6-question critique for exploratory work
+- `references/pencil-rendering-quirks.md` — known Pencil MCP rendering quirks (fresh-insert paint failures in cloned sheets, +50px y-offset on certain frames) and the clone-and-modify workaround
 
-Load references progressively based on mode (see each mode's "References needed" line). Do not load all three upfront — load what the mode requires.
+Load references progressively based on mode (see each mode's "References needed" line). Do not load the design references all upfront — load what the mode requires. **Exception:** load `pencil-rendering-quirks.md` before any mode that writes to a `.pen` file (the loose-sketch generation in modes that produce Pencil output). Skipping it risks burning a session on invisible-widget debugging.
 
 ---
 

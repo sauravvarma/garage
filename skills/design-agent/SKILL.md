@@ -67,8 +67,9 @@ This skill uses NO external MCP servers beyond Pencil MCP (the project's design 
 - `references/layout-patterns.md` — page and section layout patterns
 - `references/anti-patterns.md` — common design mistakes and AI slop detection
 - `references/taste-tuning.md` — configurable aesthetic parameters
+- `references/pencil-rendering-quirks.md` — known Pencil MCP rendering quirks (fresh-insert paint failures in cloned sheets, +50px y-offset on certain frames) and the clone-and-modify workaround
 
-Read ALL four reference files at the start of every invocation — the critique pipeline in Phase 2 needs its full vocabulary loaded; lazy-loading per phase causes the model to invent dimensions that aren't in the framework.
+Read ALL five reference files at the start of every invocation — the critique pipeline in Phase 2 needs its full vocabulary loaded, and the Pencil quirks reference must be loaded before any `batch_design` work to avoid burning a session on invisible-widget debugging. Lazy-loading per phase causes the model to invent dimensions that aren't in the framework or rediscover the rendering quirks the hard way.
 
 ---
 
@@ -199,7 +200,7 @@ After generating standard variants, optionally generate one additional variant t
 
 ## Phase 2: Critique
 
-Run the full critique framework on each variant. The four reference files were loaded upfront in "Self-contained dependencies" — no need to re-cite them per pipeline step.
+Run the full critique framework on each variant. The five reference files were loaded upfront in "Self-contained dependencies" — no need to re-cite them per pipeline step.
 
 ### Critique pipeline (in order)
 
@@ -332,7 +333,7 @@ When iterating on a previous round (user says "iterate" or "try again"), these r
 
 1. **Re-read the full spec chain** — CLAUDE.md, BRIEF-AND-DIRECTION, DESIGN-LANGUAGE, DESIGN-TOKENS, DESIGN-TAXONOMY
 2. **Re-read the feature doc** — decisions may have changed since the last round
-3. **Re-read all four reference files** — critique framework, layout patterns, anti-patterns, taste tuning
+3. **Re-read all five reference files** — critique framework, layout patterns, anti-patterns, taste tuning, Pencil rendering quirks
 4. **Rebuild the widget inventory from docs** — not from the previous Pencil frames
 5. **THEN glance at previous Pencil frames** — only to understand what was tried, never as source of truth
 
