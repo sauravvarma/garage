@@ -155,7 +155,11 @@ From what you discovered, construct a checklist tailored to this project and **w
    - **Not running →** *do not silently spawn a long-running process.* Surface to the user: *"Dev server doesn't appear to be running at `[base URL]`. Want me to start it with `[discovered command]`, or will you start it manually? (also: 'cancel')"* — then act on their answer. If the user opts to start it, run the command in the background and **bound the readiness poll at 60 seconds**. If the URL still doesn't respond after 60s, surface the underlying error (last `curl`/`wget` output or the start command's stderr) and ask the user what's wrong rather than retrying silently.
 2. **Check for Playwright.** Run `npx playwright --version`. If not available, do not auto-install — Playwright is a one-time project/system setup, not visual-qa's responsibility. Tell the user: *"Playwright isn't installed. Install once with your project's package manager (e.g. `npm install -D playwright`, `pnpm add -D playwright`, `bun add -d playwright`), then run `npx playwright install chromium`. I'll wait — re-invoke me when it's ready."*
 
-3. **Determine route(s) to check.** Use the route that was just modified. If unclear, ask the user.
+3. **Pick engines.** Default: Chromium. Add WebKit (`BROWSERS=chromium,webkit`) by default for any project that ships to mobile/Safari users — same WebKit engine that powers iOS Safari and the simulator's WKWebView, and it surfaces CSS gotchas Chromium tolerates (`backdrop-filter`, `position: fixed` under transformed ancestors, `@property`-animated CSS custom props). If WebKit binary isn't installed, tell the user: *"WebKit binary missing. Run `npx playwright install webkit` once, then re-invoke me."* Don't auto-install. Skip WebKit only if the project is desktop-Chromium-only (e.g. an Electron app).
+
+4. **Determine route(s) to check.** Use the route that was just modified. If unclear, ask the user.
+
+5. **Native shell pass (project-specific).** If the project ships through a native WebView shell (catalyst-core, Capacitor, Cordova, Ionic, or any project whose `docs/REPO-CONVENTIONS.md` describes a simulator workflow), follow that doc's tier-3 instructions for a final pass — typically a `xcrun simctl io booted screenshot ...` capture after the app has been reloaded. The skill does not enumerate framework specifics; the project's conventions own the commands. If the project has no native shell, stop after the engine passes above.
 
 ---
 
@@ -169,6 +173,7 @@ Run `node scripts/capture.js` from the project root with these env vars:
 - `BREAKPOINTS` — JSON array of `{name, width, height}` from Phase 0
 - `WAIT_TIMEOUT` — ms to wait after networkidle (default: 1500). Raise for SPAs with long-running websockets where networkidle never fires; lower for static sites where 1500ms is wasteful.
 - `FULL_PAGE` — `"true"` for full-page screenshots
+- `BROWSERS` — comma-separated engines: any of `chromium`, `webkit`, `firefox` (default: `chromium`). When more than one is set, screenshot files are prefixed with the engine name (`chromium-mobile.png`, `webkit-mobile.png`).
 
 Read each screenshot via the `Read` tool (Claude Code is multimodal).
 

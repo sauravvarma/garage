@@ -93,6 +93,16 @@ To match the user's task to its `[FEATURE]-IDEAS.md`, use the closest filename m
 - Check the golden path and the edge that prompted the change. Watch for regressions nearby.
 - If you can't run the UI (no dev server, no auth, no real data), say so explicitly — don't claim success.
 
+**Smoke-test ladder — engines and shells.** Test cheap → expensive, broad → specific. Each tier catches what the previous one misses; later tiers don't replace earlier ones.
+
+| Tier | Engine | When to run |
+|---|---|---|
+| 1 | Playwright **Chromium** (default) | Always. Logic, state machines, dispatcher wiring, most regressions. |
+| 2 | Playwright **WebKit** (`mcp__expect__open({ url, browser: "webkit" })`) | Default for any UI work that touches CSS, animation, layout, or anything users see on iOS/macOS Safari. Catches `backdrop-filter`, `position: fixed` + transformed ancestors, `@property`-animated CSS custom props, env-inset behavior, and decoder/timing bugs Chromium tolerates. Cost: one extra `open` call. |
+| 3 | Native shell (e.g. iOS / Android simulator + reload + screenshot) | **Project-specific. Run only if the project ships through a native WebView shell.** Detection: `package.json` deps include catalyst-core / `@capacitor/*` / cordova / `@ionic/*`, OR a `WEBVIEW_CONFIG` block exists, OR `docs/REPO-CONVENTIONS.md` describes a native shell. When any of those hit, follow the project's `docs/REPO-CONVENTIONS.md` for the exact commands (bundle ID, reload trick, screenshot capture). Catches native bridge calls, WKWebView/WebView compositor quirks, and view-transition/snapshot races that tiers 1–2 cannot reach because their `window.WebBridge.isNative` is `false`. |
+
+The ladder doesn't apply to backend or non-UI work — for those the standard "open in browser, exercise the path" rule above is enough.
+
 **Tests.**
 - Don't write tests unprompted. Test norms vary by project and are the user's call.
 - At task completion, nudge once: "I didn't write tests — want me to add any, and if so, what coverage?"
