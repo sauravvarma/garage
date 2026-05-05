@@ -68,6 +68,8 @@ Substitution map applied to every template:
 - `[Feature]` → feature name from Step 1
 - `[FEATURE]` → upper-kebab feature name
 - `[DESIGN_TOOL]` / `[FILE_PATH]` → from Step 1 (used in `design-code-sync.md`)
+- `[LAYOUT_STRATEGY]` → from Step 1 question 4 (project default — written into `DESIGN-LANGUAGE.md`)
+- `[ROUTE_LAYOUT_STRATEGY]` → per feature, from Step 9 (`inherit` by default; `responsive` / `desktop-only` / `mobile-only` if the user overrides — written into each `[FEATURE]-IDEAS.md`)
 - `[command]` → real command if discoverable from package.json/Makefile, else placeholder
 
 ## Folder discipline
@@ -90,8 +92,9 @@ Before creating anything, gather:
    - **Code-only project** (no design artifact) → `claude-md-code-only.md`, skip Step 13
    - **Enterprise project** (Jira / Confluence / Bitbucket workflow) → `claude-md-enterprise.md`
 3. **Design tool** — Figma, Pencil, Sketch, none yet? *Determines whether Step 11 creates a `.pen` file or a `.gitkeep`, and what gets substituted into `design-code-sync.md`.*
-4. **Features/pages** — list of routes or major features. *Determines which `[FEATURE]-IDEAS.md` files to create in Step 9.*
-5. **Existing docs** — does the project already have any of these? *Skip-if-exists rule prevents overwrites; capture the list for the final message.*
+4. **Target layout strategy (project default)** — `responsive`, `desktop-only`, or `mobile-only`? Asked as: *"What viewports does this codebase target by default? Responsive (both desktop and mobile), desktop-only, or mobile-only?"* *Used as `[LAYOUT_STRATEGY]` substitution in `DESIGN-LANGUAGE.md` so visual-qa and code-agent know which viewports to capture by default. Individual features can override this in their IDEAS doc.*
+5. **Features/pages** — list of routes or major features. *Determines which `[FEATURE]-IDEAS.md` files to create in Step 9. For each feature, also ask if it overrides the project default — most should answer `inherit`.*
+6. **Existing docs** — does the project already have any of these? *Skip-if-exists rule prevents overwrites; capture the list for the final message.*
 
 ### 2. Collect API data (optional)
 
@@ -123,7 +126,7 @@ Copy `assets/templates/brief-and-direction.md` to `docs/BRIEF-AND-DIRECTION.md`.
 
 ### 4. Create `docs/DESIGN-LANGUAGE.md`
 
-Copy `assets/templates/design-language.md` to `docs/DESIGN-LANGUAGE.md`.
+Copy `assets/templates/design-language.md` to `docs/DESIGN-LANGUAGE.md`. Substitute `[LAYOUT_STRATEGY]` with the answer to Step 1 question 4 so the "Target layout strategy" line is populated, not left as a placeholder.
 
 ### 5. Create `docs/DESIGN-TOKENS.md`
 
@@ -143,8 +146,12 @@ Copy `assets/templates/design-taxonomy.md` to `docs/DESIGN-TAXONOMY.md`. The tem
 
 ### 9. Create feature idea docs
 
-For each feature/page the user listed in Step 1, copy `assets/templates/feature-ideas.md` to `docs/[FEATURE]-IDEAS.md`. Substitute `[Feature]` with the feature name. The template includes:
-- The route chrome section so the AI always has full route context (header, footer, layout) — not just the main content area.
+For each feature/page the user listed in Step 1, copy `assets/templates/feature-ideas.md` to `docs/[FEATURE]-IDEAS.md`. Substitute `[Feature]` with the feature name and `[ROUTE_LAYOUT_STRATEGY]` with the per-feature override (default to `inherit` unless the user said this feature targets something different from the project default).
+
+Default behavior: ask the user once at the start of Step 9 *"Do any of these features need a layout strategy that's different from the project default ([LAYOUT_STRATEGY])? If so, which?"* — then write `inherit` for all features except the named overrides. Don't ask per-feature in a loop; one batched question is enough since most features inherit.
+
+The template includes:
+- The route chrome section (now including "Target layout strategy") so the AI always has full route context (header, footer, layout, viewport scope) — not just the main content area.
 - The decisions table with a `Type` column (`direction` / `variant`) which `/design-agent` and `/code-agent` watch to pick the right routing on open decisions.
 - An **"API response shape"** section header (filled in by Step 2 if mocks were provided).
 - A **"Parser implementation"** section header (placeholder — `/code-agent` populates it as patterns are discovered while implementing the feature).

@@ -103,6 +103,18 @@ To match the user's task to its `[FEATURE]-IDEAS.md`, use the closest filename m
 
 The ladder doesn't apply to backend or non-UI work — for those the standard "open in browser, exercise the path" rule above is enough.
 
+**Viewport before screenshots.** `mcp__expect__open` launches each engine at its own Playwright default, and those defaults are not the same: Chromium typically opens at 1280×720, WebKit at a phone-shaped ~390×940. If you screenshot without setting an explicit viewport, you're comparing engines at different sizes — and a smoke test can read as a pass when surrounding chrome is silently in the wrong layout mode.
+
+Two-step discipline before any tier-1 or tier-2 screenshot:
+
+1. **Resolve the active layout strategy.** Check the task's `docs/[FEATURE]-IDEAS.md` → Route chrome → "Target layout strategy" first; if it's set to anything other than `inherit` (or `[FEATURE]-IDEAS.md` doesn't exist), that wins. Otherwise fall back to the project default in `docs/DESIGN-LANGUAGE.md` → "Target layout strategy". In a monorepo, prefer the closest `DESIGN-LANGUAGE.md` to the file being edited (e.g. `apps/web/docs/DESIGN-LANGUAGE.md`) over the repo-root one.
+
+2. **Announce the active strategy and viewport(s) you'll capture, then proceed.** Format: *"Smoke-testing as desktop-only (per [FEATURE]-IDEAS.md route chrome / DESIGN-LANGUAGE.md project default) at 1280×800. Override if this task targets something different."* Cite the source so the user can decide whether to override the right doc. Accept inline redirects; don't re-ask once stated. If neither doc has the field, ask for the strategy for *this task* and offer to record it in the matching scope (project default in `DESIGN-LANGUAGE.md`, per-task override in the feature doc).
+
+3. **Set viewport explicitly for every engine you open.** Right after `mcp__expect__open`, call `mcp__expect__playwright` with `await page.setViewportSize({ width, height })`, then re-navigate or wait for layout. Common sizes: desktop 1280×800, mobile 375×812. Use spec-defined breakpoints over these defaults when the project has them.
+
+If the change is layout-affecting at one specific breakpoint, test that breakpoint plus one neighbor to catch responsive-boundary regressions.
+
 **Tests.**
 - Don't write tests unprompted. Test norms vary by project and are the user's call.
 - At task completion, nudge once: "I didn't write tests — want me to add any, and if so, what coverage?"

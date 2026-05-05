@@ -5,12 +5,16 @@ description: >-
   DIRECTION (post-direction-lock work — for direction discovery use
   /design-explore). Critiques variants against the project spec + embedded
   aesthetic frameworks, presents structured trade-off reports, supports
-  critique-only mode (evaluate existing frames without regenerating) and a
-  "push it further" option for boundary-testing variants. Explicit invocation
-  only — never triggered automatically. Use when the user says /design-agent
-  followed by a design intent, asks to critique an existing Pencil frame
-  against the spec, or wants production variants within a locked direction.
-  Pass `--use-defaults` to proceed when DESIGN-HEURISTICS.md is missing.
+  critique-only mode (evaluate existing frames without regenerating), a
+  "push it further" option for boundary-testing variants, and a mirror mode
+  (`--mode=mirror <sources.json>`) that captures already-shipped UI as
+  faithful reference frames using real tokens, real assets, and real SVG
+  icons pulled from the source code. Explicit invocation only — never
+  triggered automatically. Use when the user says /design-agent followed by
+  a design intent, asks to critique an existing Pencil frame against the
+  spec, wants production variants within a locked direction, or wants to
+  mirror a shipped feature into Pencil. Pass `--use-defaults` to proceed
+  when DESIGN-HEURISTICS.md is missing.
 ---
 
 # Design Agent
@@ -68,8 +72,9 @@ This skill uses NO external MCP servers beyond Pencil MCP (the project's design 
 - `references/anti-patterns.md` — common design mistakes and AI slop detection
 - `references/taste-tuning.md` — configurable aesthetic parameters
 - `references/pencil-rendering-quirks.md` — known Pencil MCP rendering quirks (fresh-insert paint failures in cloned sheets, +50px y-offset on certain frames) and the clone-and-modify workaround
+- `references/pencil-hygiene.md` — the five upstream rules that prevent most rendering and maintenance pain (components-first, ID-binding discipline, batch_get-over-screenshots, design tokens as variables, real assets over placeholders)
 
-Read ALL five reference files at the start of every invocation — the critique pipeline in Phase 2 needs its full vocabulary loaded, and the Pencil quirks reference must be loaded before any `batch_design` work to avoid burning a session on invisible-widget debugging. Lazy-loading per phase causes the model to invent dimensions that aren't in the framework or rediscover the rendering quirks the hard way.
+Read ALL six reference files at the start of every invocation — the critique pipeline in Phase 2 needs its full vocabulary loaded, the Pencil quirks reference must be loaded before any `batch_design` work to avoid burning a session on invisible-widget debugging, and the hygiene reference establishes the upstream rules that prevent most quirks from biting. Lazy-loading per phase causes the model to invent dimensions that aren't in the framework or rediscover the rendering quirks the hard way.
 
 ---
 
@@ -362,6 +367,86 @@ When generating multiple variants on iteration, consider parallel subagents — 
 ### Preservation
 
 Do NOT delete previous variants — the user needs them for side-by-side comparison when picking.
+
+---
+
+## Mirror Mode
+
+**Trigger:** User says `/design-agent --mode=mirror <path-to-sources.json>` — requests a faithful reproduction of an already-shipped UI as Pencil frames. Use case: capturing every state of an existing feature into a state-map `.pen` file for documentation, hand-off, or as a reference surface for future redesigns.
+
+This mode is distinct from variant generation (Phase 1) and critique-only (above). It does not generate new design ideas. It does not evaluate against taste settings. It mirrors what already exists in code with maximum fidelity.
+
+### What this mode skips
+
+Mirror mode does NOT run the spec preflight (no `BRIEF-AND-DIRECTION`, `DESIGN-LANGUAGE`, `DESIGN-HEURISTICS`, `[FEATURE]-IDEAS` required). Those docs are for forward-looking design work; mirror is backward-looking documentation. The only required input is the sources manifest.
+
+Mirror mode does NOT run Phase 2 critique. The shipped UI is the spec, not the variant.
+
+### Required input: sources manifest
+
+The user provides a path to a `sources.json` file (typically `design/sources.json` in the consuming repo). The skill never assumes file locations — every project-specific path is in this manifest. Schema:
+
+```json
+{
+  "feature": "<feature-slug>",
+  "component": "<path/to/main-react-component.js>",
+  "parser": "<path/to/parser.js>",
+  "mock": "<path/to/mock.json>",
+  "tokens": "<path/to/tokens.scss-or-css>",
+  "icon_module": "<path-to-file-defining-svg-icons>",
+  "states": [
+    {
+      "name": "<F1 state name>",
+      "url": "<route-template-with-{params}>",
+      "interactions": ["<click-selector:value>", "..."]
+    }
+  ]
+}
+```
+
+If the user invokes mirror mode without a manifest path, ask them for component + mock paths interactively, then offer to write the manifest for next time. Never hardcode paths in the skill.
+
+### Pipeline
+
+Mirror mode is a strict five-step pipeline. Each step has a hard exit if its prerequisites fail.
+
+**Step 1 — Inventory.** Read the sources manifest. Read the component file, the mock JSON, the tokens file, and the icon module. Build three artifacts in working memory:
+1. Token map: every color/size/spacing constant declared in tokens, mapped to a semantic name.
+2. Icon catalog: every inline `<svg>` and Icon-component definition in the component or icon module, with `geometry`, `viewBox`, `strokeWidth`, caps/joins.
+3. Asset list: every URL-shaped string in the mock JSON, with the semantic name (e.g. body-system "Heart Health" → its `image_url`).
+
+Run `~/vault/tools/scripts/extract-mock-assets.py <mock-path> <out-dir>` to download all assets to `design/assets/`. Run `~/vault/tools/scripts/extract-icon-paths.js <icon-module>` to dump the icon catalog as JSON.
+
+**Step 2 — Tokens.** Declare every token from the inventory as a Pencil `variables` entry in the `.pen` file. Use `$`-prefixed references everywhere downstream (per `pencil-hygiene.md` rule 4).
+
+**Step 3 — Components.** Identify every JSX structure inside a `.map()` or that is used in three or more places — these are the component candidates. For each:
+1. Define a reusable component in a scratch frame at the canvas edge.
+2. Bind every overridable descendant ID.
+3. Apply real icons (from Step 1's icon catalog) and real images (from `design/assets/`).
+
+Common candidates for any tabbed-feature mirror: `Header`, `ScoreBar`/summary, `TabBar`, the page-level row template (table row, list item, parameter card), the rail card. Refuse to proceed to Step 4 if you find yourself ready to type the same shape three times — go back and componentize it.
+
+**Step 4 — State frames.** For each state in `manifest.states`, create one top-level frame and populate it via `ref` instances of the Step 3 components plus per-state overrides. Frame names use `[mirror] <state name>` so they're distinguishable from `[proposal]` and `[variant]` frames in the same `.pen` file. Lay frames out in a grid keyed off the state count (3-wide is usually right).
+
+**Step 5 — Verification.** After every batch, verify with `batch_get`. Only call `get_screenshot` once at the end of the mirror run, and accept that fresh inserts may take a turn or two to paint (per `pencil-rendering-quirks.md`). If a screenshot disagrees with `batch_get`, trust `batch_get` and move on. Update the manifest if any state's interactions or URL drift from what was discoverable in code.
+
+### Output
+
+A new `design/<feature>.pen` (or addition to an existing one) containing:
+- A `variables` block populated from the project's tokens
+- A scratch frame at the canvas edge with reusable components (header, row template, rail, etc.)
+- One state frame per `manifest.states` entry, named `[mirror] <state name>`
+- A title text node above the frame grid linking back to the manifest path
+
+Mirror mode does NOT update `[FEATURE]-IDEAS.md` or any spec doc. It's documentation, not specification.
+
+### When to use vs other modes
+
+- Use mirror mode when the goal is **faithful reproduction of shipped UI** — onboarding docs, hand-off to design teams, baseline for a redesign.
+- Use variant generation (Phase 1) when the goal is **new design within a locked direction**.
+- Use `/design-explore` when the goal is **discovering the direction itself**.
+
+A mirror frame can become a reference frame for downstream variant generation (referenced from `DESIGN-TAXONOMY.md`), but the skill won't promote it automatically — that's a human decision.
 
 ---
 

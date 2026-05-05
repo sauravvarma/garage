@@ -6,6 +6,12 @@
 - **Layout:** [Default / Custom]
 - **Header variant:** [Full nav / Simplified / None]
 - **Footer variant:** [Single-line / Expanded / None]
+- **Target layout strategy:** [ROUTE_LAYOUT_STRATEGY]
+<!-- One of: inherit | responsive | desktop-only | mobile-only.
+     "inherit" = use the project default from DESIGN-LANGUAGE.md (most features).
+     Override only when this route targets a different viewport set than the rest of
+     the codebase (e.g. a mobile-only widget inside an otherwise-desktop app). Drives
+     which viewports visual-qa and code-agent capture for this route. -->
 
 ## Decisions
 

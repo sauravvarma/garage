@@ -55,14 +55,31 @@ Read these sources in order (stop at first match):
 
 Extract: **base URL** (e.g. `http://localhost:3000`) and **start command** (e.g. `npm run start`, `pnpm dev`, `bun dev`, `python manage.py runserver`, `go run main.go`). The skill is stack-agnostic — it doesn't infer the command from lockfiles, but it'll use whatever the project's docs say.
 
-### 0b. Discover breakpoints
+### 0b. Discover layout strategy and breakpoints
 
-Read these sources in order:
-1. `docs/` — search for breakpoint tables, media query definitions, or responsive specs in any doc file (look for keywords: "breakpoint", "viewport", "responsive", "mobile", "desktop", "media query")
+**Resolve the active layout strategy** (one of: `responsive`, `desktop-only`, `mobile-only`):
+
+1. Check the route's `docs/[FEATURE]-IDEAS.md` → Route chrome → "Target layout strategy". If set to anything other than `inherit` (or the feature doc doesn't exist), that wins.
+2. Otherwise fall back to `docs/DESIGN-LANGUAGE.md` → "Target layout strategy" (the project default). In a monorepo, prefer the closest doc to the route being tested (e.g. `apps/web/docs/DESIGN-LANGUAGE.md`) over the repo-root one.
+
+This decides which breakpoints are relevant — capturing mobile screenshots of a desktop-only codebase is wasted work, and missing the mobile pass on a responsive app misses bugs.
+
+**Announce the active strategy and source before capturing** — *"Capturing as desktop-only per [FEATURE]-IDEAS.md route chrome / DESIGN-LANGUAGE.md project default."* Cite the source so the user can decide whether to override the right doc, and accept inline redirects. Don't try to infer the strategy from folder names or media queries; those signals are project-specific and inconsistent.
+
+If neither doc has the field, ask for the strategy for *this route* and offer to record it in the matching scope: project default in `DESIGN-LANGUAGE.md`, per-task override in the feature doc.
+
+| Strategy | What to capture |
+|---|---|
+| **Responsive** | Mobile + desktop (and tablet if specs call for it) |
+| **Desktop-only** | Desktop sizes only |
+| **Mobile-only** | Mobile sizes only |
+
+**Then discover breakpoints.** Read these sources in order:
+1. `docs/` — search for breakpoint tables, media query definitions, or responsive specs in any doc file (keywords: "breakpoint", "viewport", "responsive", "mobile", "desktop", "media query")
 2. CSS/SCSS variables — search for media query definitions in the project's stylesheet entry points or variables files
 3. `CLAUDE.md` — check for breakpoint references
 
-If breakpoints are found in the spec, use those exactly — they define **discrete modes**, not a gradient. If none are found, use these defaults and confirm with the user:
+If breakpoints are found in the spec, use those exactly — they define **discrete modes**, not a gradient. Filter the discovered breakpoints by the layout strategy: a desktop-only project uses only the desktop/wide rows, a mobile-only project uses only the mobile/tablet rows, responsive uses all. If none are found, use these defaults and confirm with the user:
 
 | Name | Width × Height | Represents |
 |------|---------------|------------|
@@ -105,7 +122,8 @@ From what you discovered, construct a checklist tailored to this project and **w
 ## Project profile
 
 - **Dev server:** [start command] → [base URL]
-- **Breakpoints:**
+- **Layout strategy:** [responsive | desktop-only | mobile-only] — [one-line reason: which doc or signal classified it]
+- **Breakpoints:** _(filtered to the strategy above)_
   | Name | Width × Height | Source |
   |------|---------------|--------|
   | [name] | [w] × [h] | [which doc or file defined this] |
