@@ -1,10 +1,21 @@
+---
+paths:
+  - "[FILE_PATH]"
+  # Add the project's component directories so this rule loads when Claude
+  # reads code that should be gated. Examples:
+  #   - "src/components/**/*.{ts,tsx,scss}"
+  #   - "app/features/[feature]/**"
+  # A rule with no `paths:` field loads unconditionally on every session, which
+  # is heavy. Narrow the list to the dirs this gate should actually apply to.
+---
+
 # Design ↔ code sync gates
 
-This rule fires whenever you create or modify a `.pen` file (Gate 1) or change code in component directories (Gate 2). Both gates exist to keep design comps and code from drifting silently.
+Claude Code loads this rule into context when it reads a file matching the `paths:` patterns above. The rule body then guides any subsequent edits — Gate 1 for design-tool files, Gate 2 for component code. Both gates exist to keep design comps and code from drifting silently.
 
 ## Gate 1 — Design artifact gate
 
-Triggered when creating or modifying `.pen` files (or other design tool files).
+Applies when working on `.pen` files (or other design tool files).
 
 - **D1. Taxonomy lookup** — read `docs/DESIGN-TAXONOMY.md` artifact index. Identify which row(s) this work maps to. If none exists, add one before proceeding.
 - **D2. Frame naming** — every frame must follow the naming convention from `DESIGN-TAXONOMY.md`: `[label] Artifact — Letter: Description`. Proposal groups must be date-stamped. No unnamed or default frames.
@@ -14,7 +25,7 @@ Triggered when creating or modifying `.pen` files (or other design tool files).
 
 ## Gate 2 — Code change gate
 
-Triggered when modifying code in component directories.
+Applies when working on code in component directories.
 
 - **C1. Artifact check** — does this code map to a `Final` artifact in the index? If not, the work may be ahead of design.
 - **C2. Design impact check** — is this change material (layout, structure, content) or trivial (bug fix, perf, refactor with no visual diff)?

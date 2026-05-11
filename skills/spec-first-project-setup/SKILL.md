@@ -60,7 +60,7 @@ All file templates live in `assets/templates/`. Each "Create" step below copies 
 
 ## Conventions for all create steps
 
-Every "Create" step skips the file if it already exists; preserved files are listed in the final message. No overwrites — the user's existing work is sacred.
+Every "Create" step skips the file if it already exists; preserved files are listed in the final message. No overwrites — the user's existing work is sacred. The one exception is Step 13 (`design-code-sync.md`), which reconciles mechanically-derived fields on re-run; see that step for the diff-and-prompt protocol.
 
 Substitution map applied to every template:
 - `[Project Name]` → project name from Step 1
@@ -203,9 +203,26 @@ Copy the template that matches Step 1's project type:
 
 For design projects, the template includes a `## Pencil design file` section — fill in the absolute path from Step 11.
 
-### 13. Create `.claude/rules/` (design projects only)
+### 13. Create or reconcile `.claude/rules/design-code-sync.md` (design projects only)
 
-For design projects, copy `assets/templates/design-code-sync.md` to `.claude/rules/design-code-sync.md`. Substitute `[DESIGN_TOOL]` and `[FILE_PATH]` with the project's design tool name and absolute design file path. The template defines two gates: Gate 1 (design artifact gate, fires when modifying `.pen` files) and Gate 2 (code change gate, fires when modifying component code).
+For design projects, this rule file is loaded into context by Claude Code's native `.claude/rules/` mechanism when Claude reads a file matching its `paths:` frontmatter. The rule body then guides subsequent edits — Gate 1 for design-tool files, Gate 2 for component code. Unlike most artifacts in the pod it cannot be append-only, because the `paths:` frontmatter and `[DESIGN_TOOL]` / `[FILE_PATH]` substitutions are mechanically derived from `CLAUDE.md` and must stay in sync as the project grows.
+
+**If `.claude/rules/design-code-sync.md` does not exist:**
+
+Copy `assets/templates/design-code-sync.md` to `.claude/rules/design-code-sync.md`. Substitute `[DESIGN_TOOL]` and `[FILE_PATH]` with the project's design tool name and absolute design file path. The template's `paths:` frontmatter starts with `[FILE_PATH]` (so the rule loads when Claude reads the design file) and contains commented-out examples for component directories — propose concrete component paths based on `docs/REPO-CONVENTIONS.md` and the features listed in Step 1, and let the user confirm before writing them into the frontmatter. A rule with no `paths:` field loads on every session unconditionally, which is heavy; narrow scope is better.
+
+**If the file already exists (re-run case):**
+
+Do *not* overwrite — the user may have hand-tuned the paths or edited gate text. Instead, reconcile the mechanically-derived fields:
+
+1. **Design tool / path drift.** Read the current `[DESIGN_TOOL]` and `[FILE_PATH]` values from the rule file's body (Gate 2, C3). Compare against the values in `CLAUDE.md` (Step 12 wrote them there). If they differ, surface the diff to the user and propose substituting the new values. Apply only on confirmation.
+2. **Path coverage drift.** Read the `paths:` array in the rule file's frontmatter. Compare against the component directories referenced in `CLAUDE.md` and `docs/REPO-CONVENTIONS.md` (e.g. new feature dirs added since the rule was first generated). If any referenced component dir is not covered by an existing entry, surface the gap and propose additions. Apply only on confirmation. Also flag if the file is missing `paths:` entirely — that means it loads unconditionally, which is usually not what the user wants.
+3. **Doc-path drift.** Check that paths the rule references in its prose (`docs/DESIGN-TAXONOMY.md`, `docs/DESIGN-TOKENS.md`, the tokens SCSS file) still exist. If any moved or were renamed, surface the broken reference — do not auto-fix; let the user decide whether to update the rule or restore the path.
+4. **Legacy frontmatter migration.** If the file uses Cursor-style `globs:` instead of Claude Code's `paths:`, surface this — Claude Code ignores `globs:` and will load the rule unconditionally. Propose renaming `globs:` → `paths:` (the array contents transfer as-is).
+
+Do **not** touch the gate text (D1–D5, C1–C6) or any other prose in the rule body during reconciliation. That content is considered hand-tuned once the file exists; the user owns it.
+
+If no drift is detected, note "design-code-sync rule is in sync" in the final message alongside the preserved-files list.
 
 ### 14. Final message
 
