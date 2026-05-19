@@ -1,10 +1,10 @@
 # garage
 
-A five-skill engineering pod for Claude Code. Brainstorm a direction, generate variants, implement, verify visually — the full lifecycle, with handoffs that prevent silent assumptions.
+A six-skill engineering pod for Claude Code. Scaffold specs, research thin specs, brainstorm direction, generate variants, implement, verify visually — the full lifecycle, with handoffs that prevent silent assumptions.
 
 ```
-spec-first-project-setup  →  design-explore  →  design-agent  →  code-agent  →  visual-qa
-        scaffold                discover           generate         build           verify
+spec-first-project-setup → spec-research → design-explore → design-agent → code-agent → visual-qa
+        scaffold              research        discover         generate       build       verify
 ```
 
 Each skill owns one slice of the lifecycle. They cooperate through hard preflight contracts: `code-agent` refuses to implement features with open decisions; `design-agent` refuses to design without a locked direction; `visual-qa` runs against the project's spec, not its own assumptions. The pipeline is opinionated by design — it makes invalid intermediate states unrepresentable.
@@ -14,10 +14,11 @@ Each skill owns one slice of the lifecycle. They cooperate through hard prefligh
 | Skill | Stage | Owns |
 |---|---|---|
 | `/spec-first-project-setup` | Scaffold | `docs/`, `CLAUDE.md`, `.claude/rules/`, design directory skeleton |
+| `/spec-research` | Research thin specs | Draft `## Page states` + adjacent-gap proposals in `[FEATURE]-IDEAS.md` (behind `<!-- DRAFT -->` markers for review) |
 | `/design-explore` | Discover direction | `docs/DESIGN-HEURISTICS.md`, "Direction chosen" entries in feature docs |
 | `/design-agent` | Generate production variants | Pencil frames, design rationale entries, decision locks |
-| `/code-agent` | Implement | Code (refuses on open decisions) |
-| `/visual-qa` | Verify | `.claude/visual-qa-checklist.md`, spec-vs-rendered-code reports |
+| `/code-agent` | Implement | Code (refuses on open decisions or thin spec — routes to `/spec-research`) |
+| `/visual-qa` | Verify | `.claude/visual-qa-checklist.md`, spec-vs-rendered-code reports (matrix over states × breakpoints × engines) |
 
 Read [PHILOSOPHY.md](./PHILOSOPHY.md) for the beliefs and contracts that drive the design.
 
@@ -47,26 +48,33 @@ T0:  /spec-first-project-setup
      → asks: project name, type (design/code/enterprise), design tool, features
      → creates docs/, CLAUDE.md, design/, .claude/rules/
 
-T1:  /design-explore "what should the contact page feel like?"
+T1:  /spec-research CONTACT
+     → reads the route's API contract, role gates, URL params, and any source code
+     → proposes a draft `## Page states` table + adjacent-gap questions
+     → writes them into docs/CONTACT-IDEAS.md behind <!-- DRAFT --> markers
+     → user reviews row-by-row, locks decisions, removes the DRAFT markers
+
+T2:  /design-explore "what should the contact page feel like?"
      → aesthetic interview, generates 3-5 concepts
      → user picks one → writes docs/DESIGN-HEURISTICS.md
      → appends "Direction chosen" to docs/CONTACT-IDEAS.md
 
-T2:  /design-agent "design the contact page"
+T3:  /design-agent "design the contact page"
      → preflight passes (heuristics + feature decisions exist)
      → generates 2-3 Pencil variants in [proposal] group
      → user picks one → renames frame to [final]
      → appends "Design rationale" to docs/CONTACT-IDEAS.md, locks decisions
 
-T3:  /code-agent "implement the contact page"
-     → preflight passes (CLAUDE.md, REPO-CONVENTIONS, COMPONENT-SPECS, locked decisions)
+T4:  /code-agent "implement the contact page"
+     → preflight passes (CLAUDE.md, REPO-CONVENTIONS, COMPONENT-SPECS, locked decisions, Page states populated)
+     → if the IDEAS doc were thin instead, routes back to /spec-research
      → reads the [final] Pencil frame for spacing/composition
      → implements per spec, marks DESIGN-TAXONOMY sync state Synced
 
-T4:  /visual-qa
-     → reads breakpoints from spec
-     → captures screenshots, compares against tokens + design comp
-     → reports passes/warnings/failures per breakpoint
+T5:  /visual-qa
+     → reads breakpoints and Page states from the spec
+     → captures screenshots across states × breakpoints × engines
+     → reports passes/warnings/failures per cell, with state-coverage summary
 ```
 
 A skill at any stage will refuse to run if its prerequisites are missing — and tell you exactly which sibling skill to invoke first.
@@ -77,9 +85,10 @@ A skill at any stage will refuse to run if its prerequisites are missing — and
 
 | State | Routing |
 |---|---|
+| IDEAS doc thin: missing `## Page states`, vague verbs in locked rows, doc-vs-code drift, or — for ports — fewer states than the source has render branches | `/spec-research` |
 | `DESIGN-HEURISTICS.md` missing OR open `direction` rows | `/design-explore` |
 | `DESIGN-HEURISTICS.md` present, only `variant` rows open | `/design-agent` |
-| All rows locked | `/code-agent` |
+| All rows locked + Page states populated | `/code-agent` |
 
 The hierarchy is mostly one-way. `design-explore` Mode 5 Pivot is the only path that explicitly reopens locked direction decisions, and it leaves an audit trail in `DESIGN-HEURISTICS.md`.
 
@@ -96,9 +105,10 @@ Both flags are trailing convention but accepted anywhere in the prompt.
 
 The pod doesn't insist on its own completeness:
 
-- **Code-only projects** (no design surface) — use `spec-first-project-setup` (code-only mode) + `code-agent`. Skip the rest.
-- **Design-only projects** (no code yet) — use `spec-first-project-setup` + `design-explore` + `design-agent`. Implement later.
-- **Mid-project adoption** — run `spec-first-project-setup` to scaffold the docs around an existing codebase. Skills that require artifacts they don't see will block with a checklist.
+- **Code-only projects** (no design surface) — use `spec-first-project-setup` + `spec-research` (per feature) + `code-agent`. Skip the design family.
+- **Design-only projects** (no code yet) — use `spec-first-project-setup` + `spec-research` + `design-explore` + `design-agent`. Implement later.
+- **Mid-project adoption** — run `spec-first-project-setup` to scaffold the docs around an existing codebase, then `spec-research` per route to derive a decision tree from the existing source. Skills that require artifacts they don't see will block with a checklist.
+- **Spec-research is opt-in.** If a feature's IDEAS doc is already complete and accurate, `/code-agent` and `/visual-qa` proceed without invoking it.
 
 ## What this pod is not
 

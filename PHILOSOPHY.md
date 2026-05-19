@@ -5,7 +5,7 @@ This document explains the beliefs the `garage` pod is built on, the contracts t
 The document has three parts:
 
 1. **Foundation** — engineering beliefs that predate this pod and apply beyond it.
-2. **The pod's contract** — how the five skills cooperate, and what each one owns.
+2. **The pod's contract** — how the six skills cooperate, and what each one owns.
 3. **Working with the pod** — when to skip the pipeline, when to break the rules, how to extend.
 
 ---
@@ -49,7 +49,7 @@ This belief is what `visual-qa` checks at every captured breakpoint. It's also w
 
 ## Part 2: The pod's contract
 
-The five skills don't just coexist — they cooperate through specific contracts. Understanding these contracts is the difference between using the pod fluently and being surprised by it.
+The six skills don't just coexist — they cooperate through specific contracts. Understanding these contracts is the difference between using the pod fluently and being surprised by it.
 
 ### The lifecycle
 
@@ -141,10 +141,12 @@ The meta-rule: every rule in this document exists because its absence has produc
 
 ### How to extend or fork
 
-The pod is intentionally small (5 skills) and the contracts between skills are explicit (preflight + ownership map). To add a sixth skill:
+The pod is intentionally small (6 skills) and the contracts between skills are explicit (preflight + ownership map). The most recent addition is `/spec-research` (v1.3.0) — a worked example of these rules in practice: it owns the `## Page states` and adjacent-gap proposals in `[FEATURE]-IDEAS.md`, preflights on the IDEAS doc + project root, and `/code-agent` + `/visual-qa` updated their routing language to send users here when their preflights detect a thin spec.
+
+To add a seventh skill, follow the same shape:
 
 1. **Decide what artifact it owns.** A new skill that doesn't own any output is probably a function call disguised as a skill — keep it inline.
-2. **Define its preflight.** What does it require? What's recommended? What's optional? Use the same shape the existing five use.
+2. **Define its preflight.** What does it require? What's recommended? What's optional? Use the same shape the existing six use.
 3. **Update the ownership map** in this file.
 4. **Update sibling skills' routing language** if your new skill should be the destination for a previously-unrouted state.
 
