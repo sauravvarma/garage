@@ -1,7 +1,7 @@
 {
   "name": "garage",
   "version": "1.2.0",
-  "description": "Five-skill engineering pod for the full lifecycle: brainstorm direction, generate variants, implement, verify visually. Spec-driven, with hard handoffs between skills that prevent silent assumptions.",
+  "description": "Six-skill engineering pod for the full lifecycle: scaffold specs, research thin specs, brainstorm direction, generate variants, implement, verify visually. Spec-driven, with hard handoffs between skills that prevent silent assumptions.",
   "author": {
     "name": "Saurav Varma",
     "url": "https://github.com/sauravvarma"

@@ -19,6 +19,33 @@
 |---|----------|----------|--------|------|
 | 1 | <!-- e.g. primary layout --> | <!-- e.g. bento grid --> | <!-- locked / open --> | <!-- direction / variant --> |
 
+## Page states
+
+<!--
+The decision tree for this page: every distinct rendered state, not just the happy path. /code-agent refuses to implement until this table is filled in for features with more than one state; /visual-qa iterates QA across every row.
+
+**Don't fill this in by hand.** Run `/spec-research [FEATURE]` — it reads the API contracts, source code (for ports), role gates, URL params, and adjacent specs, then proposes a draft table you review and lock. Faster, more thorough, and catches the adjacent gaps you'd otherwise miss (chart shape, unit definitions, taxonomy entries, stale-doc drift).
+
+Common state families /spec-research walks through:
+  - Loading / first paint (no data yet)
+  - Fetching update (have prior data, refetching)
+  - Success — primary data
+  - Success — empty data (zero rows, no records, etc.)
+  - Partial data (some fields missing, optional sections absent)
+  - Error — recoverable (retry CTA)
+  - Error — terminal (5xx, auth lost)
+  - Role / permission gated (eligible / ineligible / not-yet-onboarded)
+  - Stale-during-key-change (e.g. patient switch mid-fetch)
+  - Network offline / SSE disconnected (where applicable)
+  - Mutation pending / failed / optimistic-success (for pages with writes)
+
+For ports: /spec-research mirrors the source's render branches in full, even deferred ones. Use `Status: deferred` if a state won't ship in this iteration — silent omission is the bug.
+-->
+
+| # | State | Trigger | Renders | Dispatches | Exit | Status |
+|---|-------|---------|---------|------------|------|--------|
+| 1 | <!-- e.g. eligible-loaded --> | <!-- e.g. eligibility.isEligible && data --> | <!-- ScoreBar + tabs + content --> | <!-- — --> | <!-- patient switch --> | <!-- shipped / deferred / open --> |
+
 ## Design variations
 
 <!-- Each variation MUST have a substantive description — not just a name. The description defines the layout concept (spatial pattern, hierarchy approach, content flow). The design agent uses these descriptions to build distinct variants. Vague or missing descriptions produce variants that collapse into permutations of each other. -->

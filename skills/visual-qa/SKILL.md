@@ -177,6 +177,16 @@ From what you discovered, construct a checklist tailored to this project and **w
 
 4. **Determine route(s) to check.** Use the route that was just modified. If unclear, ask the user.
 
+5. **Enumerate the page's states to QA, not just the happy path.** Read the route's `docs/[FEATURE]-IDEAS.md` for a `## Page states` (or equivalent) table — state name, trigger, what renders. Build the QA matrix as **states × breakpoints × engines**, not just **breakpoints × engines**. The bug class this prevents: shipping a layout that only ever got tested in the happy path while the empty / error / loading / partial / role-gated branches silently render broken.
+
+   For each enumerated state, figure out how to reach it:
+   - **Live-reachable** (different user, different URL, different time-of-day): note the reproduction recipe (e.g. *"navigate to `/health-record/<non-eligible-id>/insights-summary` with the seeded test account"*).
+   - **Toggle-reachable** (a query param, a feature flag, a Redux dev tool override): note the toggle.
+   - **Fixture-reachable** (the project has a mocking layer like `USE_MOCK` or a scenario harness): note the fixture name.
+   - **Unreachable from this session** (requires backend orchestration, a specific account state, etc.): record it as a deferred QA item in the report rather than silently skipping. The deferral is the decision; omission is the bug.
+
+   If the IDEAS doc doesn't have a Page states section, surface that gap before capturing — the doc is incomplete, and QA-ing the happy path alone gives false confidence. Offer to pause QA so the user can fill the table, or proceed with a flagged "only happy-path verified" report.
+
 5. **Native shell pass (project-specific).** If the project ships through a native WebView shell (catalyst-core, Capacitor, Cordova, Ionic, or any project whose `docs/REPO-CONVENTIONS.md` describes a simulator workflow), follow that doc's tier-3 instructions for a final pass — typically a `xcrun simctl io booted screenshot ...` capture after the app has been reloaded. The skill does not enumerate framework specifics; the project's conventions own the commands. If the project has no native shell, stop after the engine passes above.
 
 ---
@@ -219,13 +229,18 @@ For each screenshot, run the **project-specific checklist** built in Phase 0. Ch
 - Color strategy: [summary]
 - Key layout rules: [summary]
 
-### [Breakpoint name] ([width]×[height])
+### State coverage
+- States enumerated in IDEAS doc: [N]
+- States verified in this run: [M of N]
+- Deferred (unreachable this session): [list with reason]
+
+### [State name] · [Breakpoint name] ([width]×[height])
 ✅ [Check that passed]
 ⚠️ [Check that's ambiguous] — [what to verify manually]
 ❌ [Check that failed] — [what's wrong, what the spec says, suggested fix]
-Screenshot: /tmp/visual-qa/[name].png
+Screenshot: /tmp/visual-qa/[state]-[breakpoint].png
 
-[Repeat for each breakpoint]
+[Repeat for each state × breakpoint × engine combination]
 
 ### Summary
 - X passes, Y warnings, Z failures

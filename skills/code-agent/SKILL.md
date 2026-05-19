@@ -33,6 +33,19 @@ If `[FEATURE]-IDEAS.md` exists but has any decision in the table with status `op
 
 To match the user's task to its `[FEATURE]-IDEAS.md`, use the closest filename match. If ambiguous or none, ask the user which feature doc applies.
 
+**Spec depth — route to `/spec-research` when the IDEAS doc is thin.** Required-doc existence is checked above; *adequacy* is a separate gate. A feature with non-trivial branching needs the IDEAS doc's `## Page states` (the decision tree — what renders given which inputs) populated before I can implement against it. Refuse and route to `/spec-research` when any of these hold:
+
+- `## Page states` section is missing entirely
+- Page states table has fewer rows than the feature obviously needs (e.g. API spec implies loading + success + empty + error + role-gated, but the table lists 2)
+- For a port: the source has more render branches than the IDEAS table enumerates
+- The IDEAS doc has *vague verbs* in locked decisions ("handle the X case") without concrete render rules
+- The doc references behavior in a source codebase that I can't verify exists
+- The doc looks stale relative to a recent code/API change
+
+Route phrasing: *"The IDEAS doc's decision tree isn't complete enough to implement against safely. Run `/spec-research [FEATURE]` — it will read the data contracts, source code (if a port), and adjacent specs, and propose a draft tree plus any other gaps it surfaces. Once you've reviewed and locked the rows, come back to /code-agent."*
+
+The breadth check (chart shape ambiguity, undefined units, missing taxonomy entries, doc-vs-code drift, locked-but-inconsistent decisions) flows through `/spec-research` too — that skill is responsible for the full spec-completeness pass. Don't try to critique the docs inside this skill's preflight; that's spec-research's job. This skill's job is to detect the gap and route.
+
 ## Working style
 
 - Commits: terse, conventional, one-line. No emoji. No `Co-Authored-By` trailers.
@@ -67,6 +80,8 @@ To match the user's task to its `[FEATURE]-IDEAS.md`, use the closest filename m
 - Prefer matching existing architectural patterns over inventing new ones.
 - If conventions are missing entirely, flag and route to `/spec-first-project-setup` (the spec preflight above already handles this).
 
+**Bug fixes — read the surrounding state machine, not just the line being fixed.** A bug is rarely an isolated typo. It's usually one branch missing or one state transition skipped. Read all sibling branches; the fix should fit alongside them, not just patch the symptom. If the bug suggests the decision tree itself is incomplete, route to `/spec-research` to update it before patching.
+
 ## Output discipline
 
 **Token hygiene.**
@@ -92,6 +107,22 @@ To match the user's task to its `[FEATURE]-IDEAS.md`, use the closest filename m
 - For UI changes, open the feature in a browser and exercise it before claiming done. See `## Browser preflight` below for project-specific session setup (dev-login, fixtures, etc.).
 - Check the golden path and the edge that prompted the change. Watch for regressions nearby.
 - If you can't run the UI (no dev server, no auth, no real data), say so explicitly — don't claim success.
+
+**Test-then-commit per phase.** When a task ships in phases, the default rhythm is `implement-the-whole-phase → test → commit → next phase`. Don't accumulate uncommitted work across phases, but also don't test between sub-tasks of the same phase:
+
+- **Test at phase boundaries, not sub-task boundaries.** A phase may contain several sub-tasks that together form a coherent slice; intermediate states often won't run (e.g. reducer reshape before consumer code is updated). Don't smoke-test a half-migrated state. Finish the phase, then test once.
+- **Each phase gets its own commit** with a scoped one-liner conventional commit message. Sub-tasks within a phase can be separate commits when they're independently meaningful (e.g. "add dep" vs "use dep"), but they share one test pass at the end of the phase.
+- **The test is whatever the phase can support.** Transport-layer work (no UI yet) → server starts cleanly, route probes return the expected status, no regression on adjacent routes. State/reducer work → import doesn't crash the bundle, Redux state shape matches the spec, existing consumers still render. UI work → tier-1 smoke per the ladder above. If a phase genuinely has nothing testable (pure type/asset shuffling), state that explicitly when you commit so the user knows the test was skipped on purpose.
+- **Don't bundle phases "to save commits".** Two clean commits beat one mixed commit even if they touch the same file twice. The exception is when the user explicitly asks for a single combined commit.
+- **If a phase test fails, stop and surface.** Don't roll into the next phase with broken state on disk. Either fix in place and re-test, or revert the phase's changes and reframe.
+
+**Capture caveats in the IDEAS doc, not just the chat.** When a phase ships with a known-incomplete piece — deferred decision, workaround, hard-coded value awaiting backend, blocked-by-hook fallback, dev-env limitation, anything a future agent shouldn't have to rediscover — log it in the feature's `docs/[FEATURE]-IDEAS.md` before claiming the phase done. Conversations are ephemeral; the IDEAS doc is the institutional memory. Three rules:
+
+- **Where it lands.** Under a `## Known caveats / follow-ups` section near the bottom of the IDEAS doc (create it on first caveat). Each caveat is a bullet with: what's incomplete, why (root cause if known), the workaround currently in place, and what unblocks the proper fix.
+- **What counts.** Anything that would surprise the next agent reading the code cold: TODO comments in source, deferred decisions from this session, env / infra gaps, hooks that blocked an idiomatic implementation, payload shapes the backend hasn't confirmed. Don't log every minor preference call — log what would otherwise become a rediscovery cost.
+- **When it gets resolved.** Strike through (or remove) the bullet in the same commit that closes it, and reference the closing commit in the strike-through. Lets `git log` and the doc agree on history.
+
+A caveat captured in the chat but missing from the doc has effectively been forgotten — the next session won't have this conversation to pull from.
 
 **Smoke-test ladder — engines and shells.** Test cheap → expensive, broad → specific. Each tier catches what the previous one misses; later tiers don't replace earlier ones.
 
@@ -160,6 +191,8 @@ Before running browser-based smoke tests:
 
 This keeps project-specific setup in the project and this skill portable across repos. (Distinct from the `## Spec preflight` above, which is about doc/decision readiness rather than browser session setup.)
 
+**Use the project's npm script to start the dev server.** Look up the start command in `CLAUDE.md` (typically a `## Commands` section) or `package.json` `scripts.start` and run that — never invoke the framework binary from `node_modules/.bin/...` or hand-roll the babel/webpack command directly, even though those are what the npm script spawns internally and what shows up in `ps -ef`. The npm script owns env-var defaults, prebuild hooks, and port checks; bypassing it produces subtly broken or stale state. When restarting after a kill, still go through the npm script. Inline env-var overrides before the command (e.g. `FOO=bar npm start`).
+
 ## Handoff contract
 
 If invoked by an orchestrator, return a short structured report: diff summary, sync updates, open questions, smoke-test status. Don't echo raw diffs or full file contents.
@@ -167,6 +200,7 @@ If invoked by an orchestrator, return a short structured report: diff summary, s
 ## Out of scope routing
 
 If asked to do something outside this skill's lane, route the user:
+- Filling out a thin or stale IDEAS doc (decision tree, adjacent gaps) → `/spec-research`
 - Exploring design direction → `/design-explore`
 - Generating variants from a locked direction → `/design-agent`
 - Visual QA at breakpoints → `/visual-qa`

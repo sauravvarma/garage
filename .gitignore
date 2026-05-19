@@ -5,3 +5,9 @@
 .vscode/
 node_modules/
 *.log
+
+# Local Claude Code state
+.claude/
+
+# Skill-creator eval artifacts (per-iteration runs, fixtures, benchmarks)
+skills-workspace/

@@ -1,6 +1,6 @@
 {
   "name": "garage",
-  "description": "Spec-driven engineering pod — five Claude Code skills that move a feature from direction discovery, through production design variants, into code, and out the other side via visual QA. Hard handoffs between skills prevent silent assumptions.",
+  "description": "Spec-driven engineering pod — six Claude Code skills that move a feature from spec scaffolding and research, through direction discovery and production design variants, into code, and out the other side via visual QA. Hard handoffs between skills prevent silent assumptions.",
   "owner": {
     "name": "Saurav Varma",
     "url": "https://github.com/sauravvarma"
@@ -8,7 +8,7 @@
   "plugins": [
     {
       "name": "garage",
-      "description": "Five-skill engineering pod for the full lifecycle: brainstorm direction, generate variants, implement, verify visually.",
+      "description": "Six-skill engineering pod for the full lifecycle: scaffold specs, research thin specs, brainstorm direction, generate variants, implement, verify visually.",
       "source": "./"
     }
   ]
