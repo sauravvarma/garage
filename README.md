@@ -108,7 +108,7 @@ The pod doesn't insist on its own completeness:
 - **Code-only projects** (no design surface) — use `spec-first-project-setup` + `spec-research` (per feature) + `code-agent`. Skip the design family.
 - **Design-only projects** (no code yet) — use `spec-first-project-setup` + `spec-research` + `design-explore` + `design-agent`. Implement later.
 - **Mid-project adoption** — run `spec-first-project-setup` to scaffold the docs around an existing codebase, then `spec-research` per route to derive a decision tree from the existing source. Skills that require artifacts they don't see will block with a checklist.
-- **Spec-research is opt-in.** If a feature's IDEAS doc is already complete and accurate, `/code-agent` and `/visual-qa` proceed without invoking it.
+- **Research is non-negotiable.** If a feature's IDEAS doc is already complete and accurate, you've done the research yourself and downstream skills proceed; if it's thin, `/code-agent` and `/visual-qa` route you to `/spec-research` before they'll continue. The flexibility is *when* to do the research, not *whether*.
 
 ## What this pod is not
 

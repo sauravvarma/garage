@@ -18,7 +18,7 @@ These four beliefs are not specific to the garage pod — they are how the autho
 
 When a project has a `docs/` directory describing how a feature should look or behave, those docs are not aspirational notes or onboarding material. They are the binding specification. Code that ships must match them. Design comps that get approved must match them. If the spec is wrong, the *spec* gets updated first, and the implementation follows.
 
-This sounds obvious. It almost never holds in practice, because the path of least resistance is to write the code first and update the doc "later" (which becomes never). The pod fights this by gating implementation on the spec being present and unambiguous: `code-agent` will refuse to implement a feature whose `[FEATURE]-IDEAS.md` has open decisions. It's a small daily friction in service of a much larger long-term invariant: the docs are always trustworthy because the code can't ship without them.
+This sounds obvious. It almost never holds in practice, because the path of least resistance is to write the code first and update the doc "later" (which becomes never). The pod fights this through two complementary gates: a **lock-state** gate (decisions in `[FEATURE]-IDEAS.md` can't sit `open` while implementation proceeds) and a **spec-depth** gate (the parts of the spec the implementation will consume — the decision tree, the route chrome, the field shape — must be *adequate*, not just present). The first prevents flipping a coin on direction or variant questions; the second prevents shipping the happy path while silently inventing the empty / error / role-gated branches. Both are small daily frictions in service of a much larger long-term invariant: the docs are always trustworthy because the code can't ship without them.
 
 The corollary: when you read a spec and it disagrees with reality, the spec wins until you change it. Don't quietly bend the implementation to match what the code actually does — that's how specs rot.
 
@@ -55,13 +55,16 @@ The six skills don't just coexist — they cooperate through specific contracts.
 
 ```
 T0: spec-first-project-setup    →  scaffolds docs/, CLAUDE.md, design/, .claude/rules/
-T1: design-explore              →  discovers direction, writes DESIGN-HEURISTICS.md
-T2: design-agent                →  generates production variants in Pencil
-T3: code-agent                  →  implements per locked spec
-T4: visual-qa                   →  verifies rendered code matches the spec
+T1: spec-research               →  drafts the decision tree + adjacent-gap proposals for a feature's IDEAS doc
+T2: design-explore              →  discovers direction, writes DESIGN-HEURISTICS.md
+T3: design-agent                →  generates production variants in Pencil
+T4: code-agent                  →  implements per locked + adequate spec
+T5: visual-qa                   →  verifies rendered code across states × breakpoints × engines
 ```
 
-Each stage assumes the previous stages have completed. The pod surfaces missing prerequisites instead of inventing them. A teammate who runs `code-agent` on a brand-new project gets routed back to `spec-first-project-setup`. A teammate who runs `design-agent` on a project that hasn't run `design-explore` gets routed there.
+T0 is run once per project; T1 is run **per feature** and is required before T4 — `/code-agent` refuses to implement against an inadequate spec, so research is non-negotiable when the IDEAS doc is thin. The only choice is *when*: invoke `/spec-research` proactively before coding, or arrive at it because `/code-agent`'s preflight routed you there. T2 and T3 follow the per-feature track once T1 has produced a reviewable draft and the user has locked the rows.
+
+Each stage assumes the previous stages have completed *for the scope it cares about*. The pod surfaces missing prerequisites instead of inventing them. A teammate who runs `code-agent` on a brand-new project gets routed back to `spec-first-project-setup`; one whose IDEAS doc is thin gets routed to `spec-research`; one whose direction isn't locked gets routed to `design-explore`.
 
 ### The lock-state hierarchy
 
@@ -75,15 +78,35 @@ Routing follows the hierarchy:
 
 The hierarchy is mostly one-way. Once a direction is locked, it stays locked unless `design-explore` Mode 5 explicitly Pivots — in which case affected `direction` rows are *re-opened* as a documented event, not silently flipped. The audit trail matters: a Pivot writes a `Reaffirmations` or `Direction revised` entry into `DESIGN-HEURISTICS.md` so the same doubt doesn't resurface unexamined.
 
+### The spec-depth contract
+
+A spec can be technically present and still inadequate. A `[FEATURE]-IDEAS.md` with a route chrome, locked decisions, and one design variation doesn't necessarily tell you what the page renders during loading, when the data is empty, when a role gate fails, when the API returns 403, when a mutation 422s, when the user switches accounts mid-fetch. Implementing against an inadequate spec produces the canonical bug: ship the happy path plus the one branch the implementer happened to notice, then discover three months later that a coworker hit a state nobody enumerated.
+
+The pod treats spec adequacy as a separate concern from lock-state:
+
+- **Lock-state** asks *"are the decisions made?"*
+- **Spec-depth** asks *"are the decisions sufficient?"*
+
+Both can be true; both can be false; they are **independently gated, and both gates are hard**. A skill that detects inadequacy refuses to proceed and routes; it does not best-effort continue with a thin spec. A spec where every decision row is locked but the `## Page states` table is missing fails spec-depth even though it passes lock-state; a spec that enumerates every state but leaves three decisions `open` fails lock-state even though it passes spec-depth. The skills route on whichever gate is unmet first.
+
+`/spec-research` is the skill that exists to *make* a spec adequate. It reads the API contract, source code (for ports), role/permission gates, URL params, and adjacent specs — then proposes a draft `## Page states` table plus a list of adjacent gaps phrased as questions. `/code-agent` and `/visual-qa` route to it when their preflights detect inadequacy: missing Page states, doc-vs-code drift, vague verbs in locked decisions, fewer rows than the source has render branches.
+
+The contract has a load-bearing constraint: **`/spec-research` proposes; the user locks.** Drafts land in the IDEAS doc behind `<!-- DRAFT -->` markers; nothing becomes committed spec until the user reviews and removes the markers. Two things follow:
+
+1. **Running `/spec-research` for a non-trivial feature is mandatory** — downstream skills will refuse without it. The only flexibility is *when*: invoke it proactively up-front, or react when a later skill routes you back.
+2. **Locking is the user's call, not the skill's.** The skill closes the gap between "we should think about this" and "this is decided" without making the decisions on your behalf. Drafts that get rejected leave no trace; accepted rows become binding spec. This preserves the principle from Part 1 — the spec is binding, and "the spec" means the user-blessed parts, not whatever a skill helpfully drafted.
+
 ### The preflight pattern
 
 Each skill that *reads* state runs a preflight check before doing work. The shape is the same across the pod:
 
-1. Verify required artifacts exist.
-2. If anything required is missing, stop and present a checklist with two paths: run `spec-first-project-setup` (default) OR proceed with assumptions and flag them as you go.
+1. Verify required artifacts exist *and are adequate*. Existence is a file-system check; adequacy is judgment — *does this spec describe the surface the implementation will actually consume?*
+2. If anything required is missing or thin, stop and present a checklist with two paths: route to the skill that owns filling the gap (`spec-first-project-setup` for missing scaffolding, `spec-research` for thin specs, `design-explore` / `design-agent` for unlocked decisions), OR proceed with assumptions and flag them as you go.
 3. Wait for the user to choose.
 
 Preflight is not a politeness — it's the mechanism that prevents the pod from inventing values silently. A skill that proceeds without its inputs produces output that *looks* correct but encodes hallucinations as fact. Preflight makes this impossible by construction.
+
+Adequacy is the more demanding half of the check. It's also the part that benefits most from being mechanized: rather than asking every skill to re-derive what "adequate" means for the IDEAS doc, the pod centralizes that judgment in `/spec-research` and has the other skills delegate to it. Single source of truth for the adequacy bar.
 
 The two non-blocking exceptions are well-defined:
 - `design-agent --use-defaults` — proceed when `DESIGN-HEURISTICS.md` is missing, using safe/balanced fallbacks from `references/taste-tuning.md`. Documented in the report.
@@ -103,10 +126,12 @@ Both are explicit opt-ins. The default is always: missing inputs → block.
 | `docs/DESIGN-TOKENS.md` | `spec-first` | `design-explore` Pivot, manual | `design-agent`, `visual-qa`, `code-agent` |
 | `docs/DESIGN-TAXONOMY.md` | `spec-first` | `design-agent` (artifact index), `code-agent` (sync state) | `design-agent`, `visual-qa` |
 | `docs/DESIGN-HEURISTICS.md` | `design-explore` | `design-explore` Tweak/Pivot, Reaffirm | `design-agent` |
-| `docs/[FEATURE]-IDEAS.md` | `spec-first` (skeleton), `design-explore` (direction + variations) | `design-agent` (rationale + decision locks) | `code-agent` |
+| `docs/[FEATURE]-IDEAS.md` | `spec-first` (skeleton), `design-explore` (direction + variations) | `spec-research` (DRAFT proposals; user locks), `design-agent` (rationale + decision locks), `code-agent` (Known caveats follow-ups) | `code-agent`, `visual-qa`, `spec-research` |
 | `.claude/rules/design-code-sync.md` | `spec-first` | manual | (loaded as project rule) |
 
 The map answers a single question: **when an artifact is wrong, who fixes it?** The owner. Skills that *read* an artifact don't get to silently update it during normal operation — that path is always explicit (a Pivot, a re-run, a manual edit).
+
+`/spec-research` is unique in the ownership map: it *proposes* edits to `[FEATURE]-IDEAS.md` (writing DRAFT blocks) but doesn't *commit* them — the user does, by reviewing and removing the markers. The owner-fixes-it rule still holds; "the owner" of a locked spec row is whoever locked it, which is always the user.
 
 ### The append-only rule
 
@@ -115,6 +140,8 @@ Most artifacts in the pod grow rather than get rewritten. `[FEATURE]-IDEAS.md` a
 The rule exists because the *history* of decisions matters. A teammate joining the project six months in needs to understand not just what was decided, but what was considered and rejected, and when the direction changed. Overwriting destroys that. Appending preserves it.
 
 The exception is the design comp itself (Pencil frames). Those *do* get replaced — but the artifact index in `DESIGN-TAXONOMY.md` records the lifecycle (`[draft]` → `[final]` → `[deprecated]`), so the history of that comp is recoverable even if the file isn't.
+
+The other principled exception is `<!-- DRAFT -->` blocks (introduced by `/spec-research`). Drafts are proposals, not history: the user reviews, edits, or deletes them, and only the parts the user blesses become spec. Drafts that get rejected leave no trace because they were never spec. The append-only rule applies to *locked* content, not to proposals.
 
 ---
 
