@@ -193,6 +193,12 @@ This keeps project-specific setup in the project and this skill portable across 
 
 **Use the project's npm script to start the dev server.** Look up the start command in `CLAUDE.md` (typically a `## Commands` section) or `package.json` `scripts.start` and run that — never invoke the framework binary from `node_modules/.bin/...` or hand-roll the babel/webpack command directly, even though those are what the npm script spawns internally and what shows up in `ps -ef`. The npm script owns env-var defaults, prebuild hooks, and port checks; bypassing it produces subtly broken or stale state. When restarting after a kill, still go through the npm script. Inline env-var overrides before the command (e.g. `FOO=bar npm start`).
 
+## References — load on relevant signals
+
+Load the matching `references/<file>.md` before writing code when the signals below fire. These are domain-specific gotchas that are too niche to live in the main flow but too costly to rediscover.
+
+- `references/snapshot-hygiene.md` — **load when** the task touches frontend code that ships to a mobile WebView (catalyst-core, Capacitor, Ionic, RN Web), OR involves a component with transient state during an async op followed by navigation (loading flags, "Verifying…" labels, optimistic UI), OR the user mentions bfcache / page snapshot / back-swipe gesture / view-transitions. Covers the bfcache snapshot-timing class of bug and the wait-then-nav / portal-lift patterns that solve it.
+
 ## Handoff contract
 
 If invoked by an orchestrator, return a short structured report: diff summary, sync updates, open questions, smoke-test status. Don't echo raw diffs or full file contents.
