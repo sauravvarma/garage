@@ -1,0 +1,150 @@
+{
+  "suite": "handoff:spec-research <-> code-agent",
+  "skills_under_test": ["spec-research", "code-agent"],
+  "what_it_guards": "The contract across the shared artifact layer (the [FEATURE]-IDEAS.md Page states tree): code-agent must refuse + route when the tree is missing/thin/draft-only, and proceed when it is locked+adequate; spec-research must produce a DRAFT-marked tree in the exact template columns (never code) and mirror legacy branches for ports.",
+  "fixture_model": "Each case composes the shared base/ project with exactly one state overlay copied to docs/HABIT-TRACKER-IDEAS.md (port cases also copy ports/HabitTrackerLegacy.jsx to _port_source/). The state overlay is the only variable — diff it to see what the agent was given.",
+  "executor_model": "claude-opus-4-7",
+  "grading": "Each expectation is graded pass/fail against the transcript + the post-run workdir (files-modified). Record evidence per expectation, matching skills-workspace/iteration-*/benchmark.json shape.",
+  "cases": [
+    {
+      "id": "C1-thin-refuse-route",
+      "direction": "consumer",
+      "skill": "code-agent",
+      "state": "thin",
+      "behavior": "1 — missing Page states → refuse + route",
+      "prompt": "Use the /code-agent skill to implement the Habit Tracker described in docs/HABIT-TRACKER-IDEAS.md. Follow the project's CLAUDE.md and conventions. Do whatever the skill says to do.",
+      "expectations": [
+        { "text": "Refuses to implement; writes no source files", "evidence_hint": "files-modified under src/ = none" },
+        { "text": "Cites the missing ## Page states section specifically (not a generic 'spec unclear')", "evidence_hint": "spec-depth gate quoted" },
+        { "text": "Routes to /spec-research HABIT-TRACKER (not /design-explore or /design-agent — direction is locked, DESIGN-HEURISTICS.md present)", "evidence_hint": "route phrasing names spec-research" },
+        { "text": "Does NOT silently code the happy path", "evidence_hint": "no /habits component created" }
+      ]
+    },
+    {
+      "id": "C2-inadequate-refuse",
+      "direction": "consumer",
+      "skill": "code-agent",
+      "state": "inadequate",
+      "behavior": "2 — Page states present but inadequate → still refuse",
+      "prompt": "Use the /code-agent skill to implement the Habit Tracker described in docs/HABIT-TRACKER-IDEAS.md. Follow the project's CLAUDE.md and conventions. Do whatever the skill says to do.",
+      "expectations": [
+        { "text": "Refuses despite a ## Page states table being present (adequacy gate, not just existence)", "evidence_hint": "files-modified = none" },
+        { "text": "Names the gap concretely: API in src/lib/api/habits.ts implies 401/403/409/500 + empty, table lists only loading+success", "evidence_hint": "cites implied branches" },
+        { "text": "Flags decision #4 'handle the tier-gated case gracefully' as a vague verb lacking a render rule", "evidence_hint": "vague-verb callout" },
+        { "text": "Routes to /spec-research rather than critiquing the doc inline itself", "evidence_hint": "does not rewrite the table in-skill" }
+      ]
+    },
+    {
+      "id": "C3-draft-unlocked-refuse",
+      "direction": "consumer",
+      "skill": "code-agent",
+      "state": "draft-unlocked",
+      "behavior": "3 — DRAFT present but unlocked → must still refuse",
+      "prompt": "Use the /code-agent skill to implement the Habit Tracker described in docs/HABIT-TRACKER-IDEAS.md. Follow the project's CLAUDE.md and conventions. Do whatever the skill says to do.",
+      "expectations": [
+        { "text": "Refuses: recognizes the Page states rows are Status: proposed and wrapped in DRAFT markers, i.e. not yet locked", "evidence_hint": "cites DRAFT / proposed status" },
+        { "text": "Does NOT treat the draft as spec and implement against the proposed rows", "evidence_hint": "files-modified = none" },
+        { "text": "Asks the user to review and lock the draft (remove DRAFT markers / set Status: locked) before proceeding", "evidence_hint": "lock instruction present" },
+        { "text": "Does not re-run research redundantly — points at the existing draft rather than routing back to /spec-research to regenerate it", "evidence_hint": "no spec-research re-route" }
+      ]
+    },
+    {
+      "id": "C4-locked-proceeds",
+      "direction": "consumer",
+      "skill": "code-agent",
+      "state": "locked-adequate",
+      "behavior": "4 — locked + adequate → proceeds, no spurious route",
+      "prompt": "Use the /code-agent skill to implement the Habit Tracker described in docs/HABIT-TRACKER-IDEAS.md. Follow the project's CLAUDE.md and conventions. Produce your phased implementation plan and begin phase 1; you may stop after phase 1 is scaffolded.",
+      "expectations": [
+        { "text": "Proceeds — does NOT route to /spec-research (the gate must not be over-eager on a complete spec)", "evidence_hint": "no refusal; no spec-research mention as a blocker" },
+        { "text": "Plan covers all 7 locked states, not just the happy path", "evidence_hint": "plan references empty/403/401/409/500" },
+        { "text": "Uses tokens from DESIGN-LANGUAGE.md (CSS custom props), no raw hex/px literals", "evidence_hint": "var(--...) usage, no #hex in component" },
+        { "text": "Routes API calls through src/lib/api/, components don't fetch directly (CLAUDE.md convention)", "evidence_hint": "imports from lib/api" }
+      ]
+    },
+    {
+      "id": "C5-port-thin-refuse",
+      "direction": "consumer",
+      "skill": "code-agent",
+      "state": "port-thin",
+      "behavior": "1/2 (port) — thin port spec → refuse + route citing source reconciliation",
+      "prompt": "Use the /code-agent skill to port the Habit Tracker page from _port_source/HabitTrackerLegacy.jsx into this app, following docs/HABIT-TRACKER-IDEAS.md. Follow the project's CLAUDE.md and conventions. Do whatever the skill says to do.",
+      "expectations": [
+        { "text": "Refuses; writes no source files", "evidence_hint": "files-modified = none" },
+        { "text": "Notices the legacy source has ~7 render branches while the Page states table lists 2", "evidence_hint": "branch-count mismatch cited" },
+        { "text": "Routes to /spec-research for the port reconciliation (Source mirror) rather than porting the 2 listed states and dropping the rest", "evidence_hint": "spec-research route + reconciliation language" },
+        { "text": "Does not silently carry legacy baggage (e.g. Redux patterns) into the SvelteKit target", "evidence_hint": "no redux port attempted" }
+      ]
+    },
+    {
+      "id": "P1-thin-draft-shape",
+      "direction": "producer",
+      "skill": "spec-research",
+      "state": "thin",
+      "behavior": "5 — produces DRAFT-marked Page states in exact template columns, never code",
+      "prompt": "Use the /spec-research skill on docs/HABIT-TRACKER-IDEAS.md. Read the data contract in src/lib/api/habits.ts and the project docs, then propose the decision tree. Do whatever the skill says to do.",
+      "expectations": [
+        { "text": "Writes a ## Page states table using the template columns: # | State | Trigger | Renders | Dispatches | Exit | Status", "evidence_hint": "column header matches" },
+        { "text": "Output is wrapped in a DRAFT marker comment and rows are Status: proposed (not locked unilaterally)", "evidence_hint": "DRAFT marker present" },
+        { "text": "Writes NO source files — markdown proposal only", "evidence_hint": "no .ts/.svelte created" },
+        { "text": "Derives states from the API contract: loading, empty, success, already-done(409), tier-limit(403), unauthenticated(401), error(500)", "evidence_hint": "5+ states proposed" }
+      ]
+    },
+    {
+      "id": "P2-thin-adjacent-gaps-and-resume",
+      "direction": "producer",
+      "skill": "spec-research",
+      "state": "thin",
+      "behavior": "5+7 — surfaces adjacent gaps and returns a clean resumption hint",
+      "prompt": "Use the /spec-research skill on docs/HABIT-TRACKER-IDEAS.md as if invoked by /code-agent's preflight router. Read the data contract and docs, propose the tree, and report back to the caller. Do whatever the skill says to do.",
+      "expectations": [
+        { "text": "Produces an ## Adjacent gaps section with questions for the user (not unilateral answers)", "evidence_hint": "adjacent gaps section present" },
+        { "text": "Surfaces at least one real gap, e.g. free-tier habit cap (session.freeHabitLimit) vs 403 behavior, or empty-state CTA copy", "evidence_hint": "concrete gap tied to fixture" },
+        { "text": "Returns a structured handoff report: where the draft was written + a one-line 'once locked, return to /code-agent' hint", "evidence_hint": "resumption hint present" },
+        { "text": "Does not echo the full draft back to the caller — points at it", "evidence_hint": "report is a pointer, not a paste" }
+      ]
+    },
+    {
+      "id": "P3-port-source-mirror",
+      "direction": "producer",
+      "skill": "spec-research",
+      "state": "port-thin",
+      "behavior": "6 — port: mirror legacy render branches, surface missing states",
+      "prompt": "Use the /spec-research skill on docs/HABIT-TRACKER-IDEAS.md. This is a port; the legacy source is at _port_source/HabitTrackerLegacy.jsx. Reconcile the spec against the source. Do whatever the skill says to do.",
+      "expectations": [
+        { "text": "Produces a ## Source mirror block anchored above Page states (port-only structure)", "evidence_hint": "source mirror section present" },
+        { "text": "Mirrors all ~7 legacy branches (loading, 401 redirect, 403 upgrade+readonly list, 500 error, empty, success, 409 already-done) to target states", "evidence_hint": "branch-to-state rows" },
+        { "text": "Flags the 5 missing states absent from the current 2-row table as the reconciliation gap", "evidence_hint": "missing-state list" },
+        { "text": "Surfaces the premium-gated reorder affordance (useFlag('multi_habit')) and maps it to the session tier check per REPO-CONVENTIONS rule #3", "evidence_hint": "flag→tier mapping noted" },
+        { "text": "Writes no source files", "evidence_hint": "markdown only" }
+      ]
+    },
+    {
+      "id": "P4-inadequate-augment",
+      "direction": "producer",
+      "skill": "spec-research",
+      "state": "inadequate",
+      "behavior": "5 — augments a partial table rather than rewriting from scratch",
+      "prompt": "Use the /spec-research skill on docs/HABIT-TRACKER-IDEAS.md. The Page states table is partial. Propose what's missing. Do whatever the skill says to do.",
+      "expectations": [
+        { "text": "Preserves the 2 existing rows and proposes the missing ones as DRAFT additions (does not discard the user's locked rows)", "evidence_hint": "existing rows intact" },
+        { "text": "Proposes the missing branches: empty, 401, 403, 409, 500", "evidence_hint": "missing rows added as proposed" },
+        { "text": "Flags decision #4 'handle the tier-gated case gracefully' as a vague verb needing a concrete render rule", "evidence_hint": "vague-verb gap" },
+        { "text": "Writes no source files", "evidence_hint": "markdown only" }
+      ]
+    },
+    {
+      "id": "N1-locked-no-op",
+      "direction": "producer-guard",
+      "skill": "spec-research",
+      "state": "locked-adequate",
+      "behavior": "guard — already-adequate spec → no redundant rewrite",
+      "prompt": "Use the /spec-research skill on docs/HABIT-TRACKER-IDEAS.md. Do whatever the skill says to do.",
+      "expectations": [
+        { "text": "Recognizes the Page states tree is already complete and locked (7 states, no vague verbs)", "evidence_hint": "acknowledges adequacy" },
+        { "text": "Does NOT unilaterally rewrite or re-propose the already-locked rows as a fresh draft", "evidence_hint": "no churn on locked rows" },
+        { "text": "Either reports 'spec is adequate, nothing to research' or surfaces only genuinely new gaps — does not manufacture work", "evidence_hint": "no manufactured gaps" }
+      ]
+    }
+  ]
+}

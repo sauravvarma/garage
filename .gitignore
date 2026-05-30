@@ -11,3 +11,7 @@ node_modules/
 
 # Skill-creator eval artifacts (per-iteration runs, fixtures, benchmarks)
 skills-workspace/
+
+# Durable eval suite (evals/) IS committed — it travels with the skills it guards.
+# Only per-run benchmark outputs under any runs/ dir stay local.
+evals/**/runs/

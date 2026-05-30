@@ -1,0 +1,103 @@
+{
+  "metadata": {
+    "suite": "handoff:spec-research <-> code-agent",
+    "skill_path": "/Users/sauravvarma/vault/tools/skill-packages/garage/skills",
+    "skills_under_test": ["spec-research", "code-agent"],
+    "executor_model": "claude-opus-4-7",
+    "timestamp": "2026-05-27T16:30:00Z",
+    "fixture": "Streakly (synthetic SvelteKit habit tracker); base = faithful spec-first-project-setup output + design-explore DESIGN-HEURISTICS; base+overlay model",
+    "runs_per_case": 1,
+    "isolation": "one general-purpose subagent per case, isolated cp -R workdir, skill read from SKILL.md (Skill tool not invoked), no dev server / npm / browser / network",
+    "result": "10/10 cases pass; 40/40 expectations pass",
+    "contamination_controls": [
+      "Synthetic project, fresh domain (not Recipe Box / not dweb).",
+      "Stack divergent from real repos (SvelteKit / Svelte stores / CSS vars).",
+      "Per-case isolated workdir.",
+      "Prompts never name the skill that should be routed to."
+    ]
+  },
+  "runs": [
+    { "case_id": "C1-thin-refuse-route", "skill": "code-agent", "state": "thin", "result": {"pass_rate": 1.0, "passed": 4, "failed": 0, "total": 4},
+      "expectations": [
+        {"text": "Refuses; no source files", "passed": true, "evidence": "files-modified = none"},
+        {"text": "Cites missing ## Page states specifically", "passed": true, "evidence": "'Its ## Page states section is missing entirely'"},
+        {"text": "Routes to /spec-research, not design", "passed": true, "evidence": "routed /spec-research HABIT-TRACKER; explicitly not design (direction+variants locked)"},
+        {"text": "Does not silently code happy path", "passed": true, "evidence": "no /habits files created"}
+      ] },
+    { "case_id": "C2-inadequate-refuse", "skill": "code-agent", "state": "inadequate", "result": {"pass_rate": 1.0, "passed": 4, "failed": 0, "total": 4},
+      "expectations": [
+        {"text": "Refuses despite table present (adequacy gate)", "passed": true, "evidence": "files = none"},
+        {"text": "Names gap: API implies 401/403/409/500+empty vs 2 rows", "passed": true, "evidence": "cited habits.ts status codes vs 2-row table"},
+        {"text": "Flags decision #4 vague verb", "passed": true, "evidence": "'handle the tier-gated case gracefully' flagged"},
+        {"text": "Routes to /spec-research, no inline critique", "passed": true, "evidence": "did not rewrite table in-skill"}
+      ] },
+    { "case_id": "C3-draft-unlocked-refuse", "skill": "code-agent", "state": "draft-unlocked", "result": {"pass_rate": 1.0, "passed": 4, "failed": 0, "total": 4},
+      "expectations": [
+        {"text": "Refuses: rows are proposed + under DRAFT markers", "passed": true, "evidence": "cited Status: proposed + DRAFT marker"},
+        {"text": "Does not implement against proposed rows", "passed": true, "evidence": "files = none"},
+        {"text": "Asks user to review and lock", "passed": true, "evidence": "'lock the rows ... before implementing'"},
+        {"text": "No redundant re-route to /spec-research", "passed": true, "evidence": "pointed at existing draft; next actor = user"}
+      ] },
+    { "case_id": "C4-locked-proceeds", "skill": "code-agent", "state": "locked-adequate", "result": {"pass_rate": 1.0, "passed": 4, "failed": 0, "total": 4},
+      "expectations": [
+        {"text": "Proceeds; does NOT route", "passed": true, "evidence": "no refusal; explicitly did not route"},
+        {"text": "Plan covers all 7 states", "passed": true, "evidence": "store state machine + 401 in load fn; 409 phase-2 tagged"},
+        {"text": "Tokens only, no raw hex/px", "passed": true, "evidence": "var(--color-card/--radius-card/--space-3/--width-content)"},
+        {"text": "API via src/lib/api", "passed": true, "evidence": "store imports from $lib/api/habits; no component fetch"}
+      ],
+      "notes": "Also proactively fixed a real drift: --motion-flame specced in DESIGN-TOKENS but absent from app.css." },
+    { "case_id": "C5-port-thin-refuse", "skill": "code-agent", "state": "port-thin", "result": {"pass_rate": 1.0, "passed": 4, "failed": 0, "total": 4},
+      "expectations": [
+        {"text": "Refuses; no files", "passed": true, "evidence": "no port written"},
+        {"text": "Counts ~7 legacy branches vs 2-row table", "passed": true, "evidence": "enumerated all 7 source branches"},
+        {"text": "Routes to /spec-research for reconciliation", "passed": true, "evidence": "cited port-specific spec-depth bullet"},
+        {"text": "No Redux/React baggage carried in", "passed": true, "evidence": "no port attempted"}
+      ] },
+    { "case_id": "P1-thin-draft-shape", "skill": "spec-research", "state": "thin", "result": {"pass_rate": 1.0, "passed": 4, "failed": 0, "total": 4},
+      "expectations": [
+        {"text": "Page states in template columns", "passed": true, "evidence": "header '| # | State | Trigger | Renders | Dispatches | Exit | Status |'"},
+        {"text": "DRAFT marker + draft status", "passed": true, "evidence": "DRAFT marker; rows Status: proposed"},
+        {"text": "No source files", "passed": true, "evidence": "only IDEAS doc edited"},
+        {"text": "Derives 5+ states from API", "passed": true, "evidence": "9 states incl complete-pending/failed"}
+      ] },
+    { "case_id": "P2-thin-adjacent-gaps-and-resume", "skill": "spec-research", "state": "thin", "result": {"pass_rate": 1.0, "passed": 4, "failed": 0, "total": 4},
+      "expectations": [
+        {"text": "Adjacent gaps as questions", "passed": true, "evidence": "7 gaps, question-phrased"},
+        {"text": "Real fixture gap surfaced", "passed": true, "evidence": "freeHabitLimit=3 vs 403; empty-state CTA copy"},
+        {"text": "Structured handoff + resumption hint", "passed": true, "evidence": "'once locked, return to /code-agent'"},
+        {"text": "Points at draft, doesn't echo it", "passed": true, "evidence": "reported path + section headers only"}
+      ],
+      "notes": "Status-token inconsistency: rows reported as 'shipped' inside a DRAFT block (see findings)." },
+    { "case_id": "P3-port-source-mirror", "skill": "spec-research", "state": "port-thin", "result": {"pass_rate": 1.0, "passed": 5, "failed": 0, "total": 5},
+      "expectations": [
+        {"text": "Source mirror block above Page states", "passed": true, "evidence": "## Source mirror added, anchored above"},
+        {"text": "Mirrors ~7 legacy branches to states", "passed": true, "evidence": "all 7 mapped incl primitive subs"},
+        {"text": "Flags 5 missing states", "passed": true, "evidence": "401/403/500/empty/409 surfaced"},
+        {"text": "Reorder flag -> tier mapping", "passed": true, "evidence": "useFlag('multi_habit') -> session.tier()==='premium' per rule #3"},
+        {"text": "No source files", "passed": true, "evidence": "only IDEAS doc edited"}
+      ] },
+    { "case_id": "P4-inadequate-augment", "skill": "spec-research", "state": "inadequate", "result": {"pass_rate": 1.0, "passed": 4, "failed": 0, "total": 4},
+      "expectations": [
+        {"text": "Preserves 2 locked rows; adds missing as draft", "passed": true, "evidence": "rows 1-2 verbatim locked; rows 3-8 Status: draft"},
+        {"text": "Proposes missing empty/401/403/409/500", "passed": true, "evidence": "all five appended"},
+        {"text": "Flags decision #4 vague verb", "passed": true, "evidence": "flagged in note + first adjacent gap"},
+        {"text": "No source files", "passed": true, "evidence": "only IDEAS doc edited"}
+      ],
+      "notes": "Used Status: draft (see findings)." },
+    { "case_id": "N1-locked-no-op", "skill": "spec-research", "state": "locked-adequate", "result": {"pass_rate": 1.0, "passed": 3, "failed": 0, "total": 3},
+      "expectations": [
+        {"text": "Recognizes table complete + locked", "passed": true, "evidence": "ran adjacent-gap checklist; reported adequate"},
+        {"text": "Does NOT rewrite locked rows", "passed": true, "evidence": "files = none"},
+        {"text": "Reports adequate, no manufactured work", "passed": true, "evidence": "declined to propose; noted unused Habit fields are intentional scope"}
+      ] }
+  ],
+  "findings": [
+    {
+      "id": "F1-status-token-inconsistency",
+      "severity": "medium",
+      "title": "spec-research uses inconsistent Status tokens for unlocked rows; template vocabulary disagrees with what code-agent keys on",
+      "detail": "Across 4 producer runs the draft Page-states rows were labelled with 4 different Status values: P1 'proposed', P2 'shipped', P3 'shipped', P4 'draft'. The feature-ideas.md template's Status example reads 'shipped / deferred / open'; spec-research's own SKILL examples use 'proposed'; code-agent's draft-vs-locked detection (C3) relies on recognizing a not-locked status. C3 passed only because its fixture hard-codes 'proposed' + DRAFT markers. If spec-research emits 'shipped' inside a DRAFT block (as P2/P3 did), a future code-agent run could misread unreviewed rows as ratified. Latent handoff bug.",
+      "recommendation": "Pin one Status vocabulary across the three artifacts: feature-ideas.md template, spec-research output format, and code-agent's gate. Suggest: proposed -> locked -> deferred. Update the template's Status example (currently 'shipped/deferred/open') to match, and have code-agent treat anything != 'locked' (and/or any live DRAFT marker) as not-implementable."
+    }
+  ]
+}
