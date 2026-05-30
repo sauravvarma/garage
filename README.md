@@ -28,7 +28,7 @@ Read [PHILOSOPHY.md](./PHILOSOPHY.md) for the beliefs and contracts that drive t
 - **Pencil MCP** — required for `design-explore` and `design-agent`. The other three skills work without it.
 - **Playwright** — required for `visual-qa`. One-time project setup; the skill deliberately doesn't auto-install (was npm-coupled, broke on pnpm/yarn/bun/Python/Go projects). When `visual-qa` runs and Playwright is missing, it tells you exactly what to install.
 
-The pod has no other runtime dependencies. Skills are pure markdown + small reference files; the only executable code is `visual-qa/scripts/capture.js` (a 35-line Playwright wrapper).
+The pod has no other runtime dependencies. Skills are pure markdown + small reference files; the only executable code in the skills themselves is `visual-qa/scripts/capture.js` (a 35-line Playwright wrapper). The dev-only eval suite under `evals/` ships a bash runner that never calls an LLM.
 
 ## Install
 
