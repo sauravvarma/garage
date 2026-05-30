@@ -79,3 +79,29 @@ Architectural patterns, philosophy, and institutional knowledge for this project
 <!-- - How they're loaded into the dev environment (e.g. parsed at module load and seeded into reducer initialState). -->
 <!-- - The policy for keeping them in sync with the real API. -->
 <!-- - Whether a TODO: API marker convention is in use to flag synthesised fields the backend should ship. -->
+
+## Naming & file layout
+
+<!-- Project-wide naming/structure conventions that apply to ALL features (greenfield + ports). -->
+<!-- - Directory casing for pages, containers, widgets, components, flows. -->
+<!-- - Main component file pattern, stylesheet pattern, skeleton suffix (no dot vs dot-separator). -->
+<!-- - Reducer slice naming (camelCase root tracking the dir, createAsyncThunk type prefix, exported reducer name). -->
+<!-- - Constants / analytics / parser file conventions (singular vs plural, tracking.js vs GAEvents.js, etc.). -->
+<!-- - Version-suffix policy: when (if ever) is a `V2` / `_new` suffix allowed in this repo? Default: never on first implementation. -->
+
+## Primitive substitutions (for ports from other repos)
+
+<!-- Empty for greenfield projects. Populated when port-features land. -->
+<!-- One row per substitution: source-repo primitive → target-repo equivalent, with rationale and example. -->
+<!-- e.g. mweb's `Client_Only_Render` HOC → dweb's `@loadable/component` with `{ ssr: true, fallback: <Skeleton /> }`. -->
+
+## Backend-contract gotchas (for ports)
+
+<!-- Header / cookie / auth differences between source and target environments that would silently 4xx a verbatim port. -->
+<!-- e.g. "Source backend accepts dweb's default platform headers; target backend rejects them with 400 — pass HACK_HEADERS in the API call." -->
+
+## Source-baggage drop list (for ports)
+
+<!-- Patterns from the source repo that should NEVER propagate forward. -->
+<!-- e.g. `/experiments/` path segments, AB-test wrappers, version suffixes from a long-gone V1, mweb-only chrome. -->
+<!-- This is the canonical list — /spec-research reads it during port-feature conformance checks. -->

@@ -37,6 +37,31 @@ If the IDEAS doc references mweb / a legacy source and that source isn't readabl
 
 The decision tree is the **product-level state machine** — what the page renders given its inputs. It is *not* a dump of render branches in source code; the source code populates the tree but isn't the tree.
 
+### Step 0 — migration interrogation (per feature, not per project)
+
+Migration is a per-feature posture, not a project-wide one. A repo can have one port-feature next to ten greenfields — so the question gets asked at every feature, not once at bootstrap. Ask the user:
+
+> *"Is this feature a port from a source (sibling repo, legacy codebase, demo, prior internal version)?"*
+
+- **No** → skip the rest of this step; go to Step 1.
+- **Yes** → drive the port-aware path:
+
+  1. **Capture source pointer.** Get source path(s) — repo, directory, key files. Save them in a `Source mirror` block at the top of the feature IDEAS doc (see Output format).
+  2. **Read the global port rules.** Open the project's `docs/REPO-CONVENTIONS.md` and find the port-relevant sections: *Naming & file layout*, *Primitive substitutions*, *Backend-contract gotchas*, *Source-baggage drop list*. (These were scaffolded by `/spec-first-project-setup`; they may be empty.)
+     - **Populated** → carry the locked rules forward as constraints on this feature's port plan.
+     - **Empty or thin** → surface as the first adjacent gap: *"This is one of the first port-features this project has spec'd; the global port rules in REPO-CONVENTIONS.md are sparse. Want to fill them now (so future port-features inherit), or inline the per-feature decisions and leave the global doc thin for now?"* Either path is valid — let the user choose. If they fill globally, propose draft rows in REPO-CONVENTIONS and wait for lock before continuing.
+  3. **Add a `Source mirror` block to the feature IDEAS doc.** Columns/rows that always appear:
+     - Source path being mirrored (repo + dir).
+     - Target path (with mapping rationale — typically applying the global naming rules: strip version suffixes, drop `/experiments/`, etc.).
+     - Per-source render branch → target state (this is what the existing Step 3 produces; nest under this block).
+     - Deliberately preserved behavior, with reason.
+     - Deliberately dropped behavior, with reason (cross-link to the global drop list when applicable; if a drop is new and reusable, propose promoting it).
+     - Primitive substitutions in use (referenced from the global table).
+     - Backend-contract gotchas hit (referenced from the global section).
+  4. **Conformance check at proposal time.** Once states/decisions are drafted (after Step 4 populates the table), verify each row against the global rules: target paths match the naming convention, no source-baggage propagated, primitive substitutions applied where source uses a missing primitive, backend gotchas accounted for. Mismatches become adjacent gaps in the proposal.
+
+For greenfield features, none of this applies — the rest of the process is unchanged. The skill's behavior cleanly bifurcates on the Step 0 answer.
+
 ### Step 1 — inventory the inputs
 
 For the feature in scope, list every input that can change what's rendered:
@@ -74,7 +99,9 @@ The goal is: each state is a **distinct render branch** with its own trigger, it
 
 ### Step 3 — for ports, mirror source render branches
 
-When porting a feature, read the source component's full render tree:
+Only runs when Step 0's interrogation answered "yes, this is a port." The output of this step nests inside the `Source mirror` block established in Step 0; it doesn't introduce a separate output structure.
+
+Read the source component's full render tree:
 
 - Every `if (...) return ...` and ternary in the render path
 - Every reducer flag whose name starts with `is/has/should/can`
@@ -83,7 +110,7 @@ When porting a feature, read the source component's full render tree:
 
 Map each source branch to a node in the decision tree. Some will collapse (the source uses a boolean flag, but it's the same state as one already in your tree). Some will reveal states you'd have missed without the source.
 
-If the source has 8 branches and your derivation has 4, find the missing 4 *or* explain why the dweb / target implementation legitimately drops them (e.g. "dweb routes mount per-patient, so mweb's `patient-switch-stale` branch is unreachable here — drop with rationale").
+If the source has 8 branches and your derivation has 4, find the missing 4 *or* explain why the target implementation legitimately drops them (e.g. "target routes mount per-patient, so source's `patient-switch-stale` branch is unreachable here — drop with rationale"). Drops with a reusable rationale get proposed for promotion to the global *Source-baggage drop list* in REPO-CONVENTIONS.
 
 ### Step 4 — populate the table
 
@@ -110,10 +137,20 @@ Each gap becomes a question for the user, not a unilateral fill. Phrase them so 
 
 ## Output format
 
-Produce a proposed patch to the IDEAS doc with two new sections, marked as drafts so the user reviews before they become spec:
+Produce a proposed patch to the IDEAS doc, marked as drafts so the user reviews before they become spec. For greenfield features the patch is two sections (`Page states` + `Adjacent gaps`); for ports it gains a third (`Source mirror`) anchored above the others.
 
 ```markdown
 <!-- DRAFT — proposed by /spec-research [date]. Review and lock before /code-agent. -->
+
+## Source mirror   <!-- only for ports; omit for greenfield -->
+
+- **Source path:** `<repo>/<dir>/<file>` (the verbatim source being ported)
+- **Target path:** `<repo>/<dir>/<file>` (after applying global naming rules from REPO-CONVENTIONS → Naming & file layout — strip version suffixes, drop experiment segments, etc.)
+- **Preserved behavior:** bullet list with reason per item.
+- **Dropped behavior:** bullet list with reason per item. Cross-link the global *Source-baggage drop list* when a drop matches an existing rule; propose promotion when a new drop is reusable.
+- **Primitive substitutions used:** ref rows from REPO-CONVENTIONS → Primitive substitutions (e.g. `Client_Only_Render → @loadable/component`).
+- **Backend-contract gotchas hit:** ref entries from REPO-CONVENTIONS → Backend-contract gotchas (e.g. platform-header masquerade).
+- **Conformance check result:** pass / mismatches-as-gaps. Mismatches surface in the Adjacent gaps section below.
 
 ## Page states
 

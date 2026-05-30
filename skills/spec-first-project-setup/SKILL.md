@@ -170,6 +170,12 @@ This doc captures architectural patterns, routing philosophy, state management c
 - **Styling**: CSS architecture? Modules, tokens, variables, preprocessors? (Look for shared SCSS/CSS files, theme config.) **Check whether tokens are auto-injected by sass-loader / style-loader** (common in catalyst-core / CRA-style setups) — if yes, document so engineers don't waste time `@import`ing them.
 - **Environment / setup**: are there per-engineer files (e.g. local config, `.env`) that aren't in git? Document the bootstrap procedure.
 - **Framework gotchas**: known issues with the framework that bite during development — leave a section heading even if empty so `/code-agent` knows where to write findings.
+- **Port-relevant section scaffolding (always — empty is fine)**: leave these section headings in `REPO-CONVENTIONS.md` even when the project has zero port-features today, so the first port-feature to land has a home to write into instead of inventing one:
+  - **Naming & file layout** — directory casing, version-suffix policy (e.g. drop source-repo `V2` when the target has no V1), file-name patterns inside containers/pages, slice-key conventions.
+  - **Primitive substitutions** — when a feature ported from a source repo uses a wrapper/HOC/utility that doesn't exist in this repo, the target equivalent. One row per substitution (`source primitive → target primitive`, with rationale).
+  - **Backend-contract gotchas** — header / cookie / auth differences between source and target environments (the kind of thing that makes a verbatim port 4xx silently).
+  - **Source-baggage drop list** — things the source repo carries that should never propagate forward (mweb's `/experiments/` path segments, AB-test wrappers, version suffixes from a long-gone V1).
+  These sections stay empty for greenfield projects and fill incrementally — populated either directly by the user or via `/spec-research` when the first port-feature triggers the conformance check (see spec-research's "Migration interrogation" step).
 
 If the codebase is new/empty, copy the template as-is. If it's an existing codebase, copy the template and seed the sections from your investigation, leaving placeholders for what you couldn't discover.
 
