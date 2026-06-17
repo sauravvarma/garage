@@ -127,12 +127,12 @@ Resolve before any Pencil MCP call:
 
 ### Frame naming for exploration
 
-Exploration frames go in a group named: `[explore] [Intent] — [YYYY-MM-DD]`
-
-Inside, frames are named by concept, not variant letter — exploration concepts shouldn't get conflated with `/design-agent`'s production A/B/C variants:
+Exploration frames go in a group named: `[explore] [Intent] — [YYYY-MM-DD]`. The group name carries the **origin** axis; the frame's bracket carries the **lifecycle** axis (see `docs/DESIGN-TAXONOMY.md` → "Three axes"). Inside an `[explore]` group, candidates are `[concept]` frames — the direction-decision equivalent of `/design-agent`'s `[variant]` frames, kept under a distinct label so concepts and production variants never get conflated:
 - `[concept] Editorial Gravity — bold serif headlines, generous whitespace`
 - `[concept] Warm Minimalism — restrained palette, rounded forms, breathing room`
 - `[concept] Swiss Precision — tight grid, monospace labels, high contrast`
+
+When the user picks a direction, the winning `[concept]` is promoted to `[anchor]` (the terminal, read-only direction anchor) and the losers become `[deprecated]` — see the **Direction Commit Gate**. `[concept]` and `[anchor]` are defined in `docs/DESIGN-TAXONOMY.md`; this skill owns the transition between them.
 
 ---
 
@@ -299,7 +299,7 @@ Generate 2-3 alternative directions that address whatever felt off. Each alterna
 The user can:
 - **Reaffirm the current direction** — "OK, I'm convinced it's right." Append a one-line audit entry to `docs/DESIGN-HEURISTICS.md` under a "## Reaffirmations" section: `[YYYY-MM-DD] Reaffirmed after challenge: [one-sentence rationale]`. This leaves a trail so the same doubt doesn't resurface unexamined.
 - **Tweak the direction** — adjust DESIGN-HEURISTICS.md taste parameters and specific tokens. → Run the **Direction Commit Gate** (see below) to re-write DESIGN-HEURISTICS.md with the new settings.
-- **Pivot** — fundamentally change the direction. Before declaring impact, enumerate the affected work: list every Pencil frame in the file (via Pencil MCP search) and every `[FEATURE]-IDEAS.md` doc with a "Direction chosen" entry. → Run the **Direction Commit Gate**, plus update DESIGN-LANGUAGE.md and possibly DESIGN-TOKENS.md. Mark all open `direction` decisions as re-opened in affected feature docs (this is the post-hoc reopen path that `/design-agent` and `/code-agent` watch for via the Type column). Flag the pivot scope: "This will invalidate the following frames and feature directions: [enumerated list]."
+- **Pivot** — fundamentally change the direction. Before declaring impact, enumerate the affected work: list every Pencil frame in the file (via Pencil MCP search) and every `[FEATURE]-IDEAS.md` doc with a "Direction chosen" entry. → Run the **Direction Commit Gate**, plus update DESIGN-LANGUAGE.md and possibly DESIGN-TOKENS.md. Mark all open `direction` decisions as re-opened in affected feature docs (this is the post-hoc reopen path that `/design-agent` and `/code-agent` watch for via the Type column). **Relabel the invalidated terminal frames → `[deprecated]`** — a Pivot is the *only* sanctioned exception to invariant I4 (terminals don't transition back), so the enumerated `[anchor]`/`[final]` frames it invalidates must be moved to `[deprecated]` as part of this step, with their artifact-index rows updated. This is what keeps the deprecation audit-trailed instead of leaving orphaned terminals that later readers would treat as still-live references. Flag the pivot scope: "This will invalidate the following frames and feature directions: [enumerated list]."
 - **Keep exploring** — not ready to decide. Continue in exploration mode.
 
 If `--ephemeral` is active, all writes go to `/tmp/` instead of project docs. Reaffirm/Tweak/Pivot still produce a scratchpad report; project state is untouched.
@@ -313,6 +313,8 @@ Triggered when the user picks a concept (Mode 1 Step 5, Mode 2 Step 5, Mode 4 St
 **Why this gate is load-bearing:** `/design-agent`'s spec preflight hard-blocks without `docs/DESIGN-HEURISTICS.md`. Skipping the write breaks the next skill in the chain — the user thinks direction is locked, then `/design-agent` refuses to run.
 
 **Required outputs:**
+
+0. **Promote the chosen concept frame (atomic).** If concept frames were sketched in Pencil, run the **atomic promotion** from `docs/DESIGN-TAXONOMY.md` as one operation: rename the winning `[concept]` → `[anchor]` (the direction anchor), rename the losing `[concept]` siblings → `[deprecated]`, rename any prior `[anchor]` of the same Artifact Name → `[deprecated]` (enforces invariant I2), and update the artifact-index rows. The `[anchor]` is terminal and read-only — it now plays the **direction-anchor** reference role for `/design-agent` (it informs *feel*, never content). If no frames were sketched (concepts stayed written-only), skip this step — the heuristics doc below is the durable artifact.
 
 1. **Write `docs/DESIGN-HEURISTICS.md`** — translate the chosen concept into taste-tuning parameters using the human-readable "label (range)" format. Always write the **label first**, with the numeric range in parentheses — designers and PMs should be able to read the file without looking up what numbers mean.
    - DESIGN_VARIANCE: e.g., "distinctive (7-8)"

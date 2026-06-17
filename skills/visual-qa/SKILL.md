@@ -1,15 +1,25 @@
 ---
 name: visual-qa
 description: >-
-  Automated visual QA for any frontend project. Captures screenshots at
-  spec-defined breakpoints via Playwright, reads them multimodally, and checks
-  against the project's own spec (tokens, layout rules, design language) —
-  not hardcoded assumptions. Learns project profile from docs/, CLAUDE.md,
-  and design tokens; persists checklist to .claude/visual-qa-checklist.md.
-  Use after layout or component changes, before reporting a layout task as
-  done, or when the user says "visual QA / check breakpoints / screenshot
-  check / does this look right / before-after diff". Not for accessibility
-  audits or performance checks — those are separate tools.
+  Automated visual QA for a running frontend — screenshots the real rendered UI
+  at the project's breakpoints and checks it against the project's own spec
+  (tokens, layout rules, design language) AND its sibling screens, not hardcoded
+  assumptions. Standalone on any frontend project; learns the project profile
+  from docs/, CLAUDE.md, and design tokens. Use to verify how something LOOKS
+  after a change, before shipping — especially: you changed CSS/layout/spacing
+  and want to catch overflow or breakpoint regressions; "does this screen look
+  the same as that one"; you reused or swapped in a shared component (error/empty
+  state, card, modal) and want to confirm the rendered result matches its other
+  call-sites; it "looks off vs the rest"; or before marking a layout task done /
+  opening a PR. Also triggers on "visual QA / check breakpoints / screenshot
+  check / does this look right / before-after diff". Boundaries: for whether the
+  design itself is right ("what should this feel like", critique the aesthetic
+  direction) use design-explore; for Pencil comps or variants use design-agent;
+  matching a reused component's wrapper WHILE writing the code is code-agent's
+  job (visual-qa verifies the rendered result). NOT for accessibility/contrast
+  audits, performance/bundle-size checks, writing tests, refactoring a
+  component's API, copy/wording decisions, or debugging non-visual bugs (a blank
+  modal from a logic/state error is a code fix, not a visual diff).
 ---
 
 # Visual QA
@@ -103,9 +113,9 @@ When emitting the project-specific checklist in Phase 0e, omit sections whose so
 
 Check if the project has visual design references:
 - `design/` directory — Pencil, Figma exports, screenshots
-- Artifact index in `docs/DESIGN-TAXONOMY.md` or equivalent — which frames are "Final" and "Synced"
+- Artifact index in `docs/DESIGN-TAXONOMY.md` or equivalent — which frames are `[final]` (implementable spec) and `Synced`
 
-If design artifacts exist for the route being tested, they become the comparison reference.
+The design-vs-code comparison reference is the `[final]` frame for the route — only `[final]` is implementable spec (`[anchor]`/`[variant]` are reference-role or candidate frames, not the thing the code was built to match — see `docs/DESIGN-TAXONOMY.md`). When picking it, validate invariant **I1**: at most one `[final]` per Artifact Name. If two `[final]` frames exist for the same artifact, the taxonomy is in an invalid state — surface it as a finding (*"two `[final]` frames for [artifact]; can't pick a comparison baseline until one is deprecated"*) rather than silently comparing against an arbitrary one. If a `[final]`+`Synced` frame exists for the route being tested, it becomes the comparison reference.
 
 ### 0e. Build and emit the project-specific checklist
 
@@ -216,6 +226,23 @@ For each screenshot, run the **project-specific checklist** built in Phase 0. Ch
 - Compare against the spec: if the spec says "4 columns on desktop" and you see 3, that's a failure.
 - Compare against the design artifact: if a "Final + Synced" Pencil frame exists for this route, compare layout, spacing, and structure.
 - Note anything ambiguous as a warning rather than a pass or fail.
+
+### Reused-component parity: render a sibling baseline, don't trust "same widget = same look"
+
+When the screen under test renders a **shared component** that already appears elsewhere (error states, empty states, cards, modals), verifying it *against itself* is not enough — "I reused the component, so it matches" is a false inference. A component's final appearance is set by **two** things: the component's own markup *and* the caller-side wrapper around it (centering container, width constraint, background, padding). The wrapper lives at each call site, not in the component, so reusing the component copies only half the contract.
+
+Rule: **render at least one existing sibling that uses the same component as the baseline, and diff against it** — not against your own expectations. Find other call sites, pick the canonical one, capture it (force its state if needed), and compare wrapper-level properties side by side:
+
+- **Container width / horizontal overflow** — measure `document.documentElement.scrollWidth - window.innerWidth`. A fixed-width host around a component that siblings render fluid overflows at narrower viewports. Compute it; don't eyeball it.
+- **Vertical placement** — centered in the viewport, or top-aligned with dead space / unrelated chrome below? Siblings often use a viewport-height container + flex-centering that a naive host wrapper lacks.
+- **Background / surface** — the host's surface may bleed behind the component where siblings sit on a different one.
+- **Caller props** — diff the actual props each call site passes. Same component, different props = different render.
+
+Two screenshot-hygiene traps that hide exactly these:
+- **Full-page screenshots hide vertical-centering and chrome-bleed bugs.** A `FULL_PAGE=true` capture stretches to content height, so "not centered in the viewport" and "unrelated content renders mid-screen" become invisible — there's no fixed viewport frame to judge against. Capture a **viewport** screenshot (FULL_PAGE unset) when centering or vertical placement is in question.
+- **Grep/copy checks can't see geometry.** Matching text strings verifies copy, never width, centering, background, or overflow. A copy match is not a layout pass.
+
+If you cannot reach a sibling's state this session, say so and mark the parity check deferred — don't substitute "reused the component" as evidence.
 
 ---
 

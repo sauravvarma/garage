@@ -130,11 +130,22 @@ Scan the feature doc's decision table. Decision rows may carry an optional `Type
 - **Open `variant` decisions (or untyped opens with DESIGN-HEURISTICS present) →** Write a proposal section to the existing `docs/[FEATURE]-IDEAS.md` (do not create the file — preflight already enforced its existence) with the questions that need answering. Present them to the user. **STOP. Do not design until the user answers.**
 - **All decisions locked →** Proceed to Phase 1.
 
-### 0c. Find reference frames
+### 0c. Find reference frames + check invariants
 
-From the artifact index in `docs/DESIGN-TAXONOMY.md`, find all frames with stage "Final". Identify the one most similar to what's being designed (similar page type, similar content structure). This becomes the pattern reference.
+"Reference" is a **role**, not a lifecycle label (see `docs/DESIGN-TAXONOMY.md` → "The reference role"). Two terminal states play it, in three sub-roles — gather whichever apply to what's being designed:
 
-If the reference frame is in Pencil, read it via Pencil MCP to extract spacing, hierarchy, and composition patterns.
+- **Direction anchor** — the `[anchor]` frame in this feature's `[explore]` group. Grounds *feel* (aesthetic). One anchor may inform many features.
+- **Pattern source** — a `[final]` frame of a similar page-type (similar content structure). Grounds *composition*. Pick the single most similar one as the primary pattern reference.
+- **Mirror baseline** — if this is a redesign, the `[anchor]` frame(s) in the feature's `[mirror]` group. Grounds *what the current shipped UI looks like*.
+
+From the artifact index in `docs/DESIGN-TAXONOMY.md`, find reference-role frames (rows labeled `[final]` or `[anchor]`). Read the relevant ones via Pencil MCP to extract spacing, hierarchy, and composition patterns. **Reference frames inform proportion, hierarchy, and feel — never content or inventory.** Content comes from the docs (see "Source of truth"); never copy-and-rearrange a reference frame.
+
+**Invariant check (block on violation).** While reading the index, validate the taxonomy invariants from `docs/DESIGN-TAXONOMY.md`:
+- **I1** — at most one `[final]` per Artifact Name.
+- **I2** — at most one `[anchor]` per Artifact Name.
+- **I3** — `[concept]`/`[variant]` frames exist only inside a dated `[explore]`/`[proposal]` group.
+
+If any invariant is violated (e.g. two `[final]` frames for the same Artifact Name — usually a non-atomic promotion done by hand in the editor), **stop and surface it**: *"The taxonomy is in an invalid state: [violation]. This is usually a promotion that wasn't completed atomically. Fix the labels (and the artifact-index rows) before I design against it."* Do not guess which terminal is authoritative.
 
 ### 0d. State active configuration
 
@@ -314,7 +325,7 @@ Then a trade-off summary:
 
 The user will:
 1. Review variants in Pencil
-2. Pick one → rename to `[final]`
+2. Pick one → **atomic promotion** (per `docs/DESIGN-TAXONOMY.md`): rename the winning `[variant]` → `[final]`, rename the losing `[variant]` siblings → `[deprecated]`, rename any prior `[final]` of the same Artifact Name → `[deprecated]` (enforces invariant I1), and update the artifact-index rows — all as one operation, never "rename the winner now, clean up later". A new `[final]` starts at sync state `Not started`.
 3. OR ask for iteration: `/design-agent "iterate — more whitespace on B"`
 4. OR reject all: `/design-agent "try again with single-column layout"`
 
@@ -426,7 +437,7 @@ Run `~/vault/tools/scripts/extract-mock-assets.py <mock-path> <out-dir>` to down
 
 Common candidates for any tabbed-feature mirror: `Header`, `ScoreBar`/summary, `TabBar`, the page-level row template (table row, list item, parameter card), the rail card. Refuse to proceed to Step 4 if you find yourself ready to type the same shape three times — go back and componentize it.
 
-**Step 4 — State frames.** For each state in `manifest.states`, create one top-level frame and populate it via `ref` instances of the Step 3 components plus per-state overrides. Frame names use `[mirror] <state name>` so they're distinguishable from `[proposal]` and `[variant]` frames in the same `.pen` file. Lay frames out in a grid keyed off the state count (3-wide is usually right).
+**Step 4 — State frames.** Create one dated origin group named `[mirror] <feature> — [YYYY-MM-DD]` (the *captured-on* date — staleness, not sync, is a mirror's failure mode). For each state in `manifest.states`, create one frame inside that group and populate it via `ref` instances of the Step 3 components plus per-state overrides. Each frame's lifecycle label is **`[anchor]`** — mirror captures are born terminal and read-only (they play the **mirror-baseline** reference role per `docs/DESIGN-TAXONOMY.md`); there is no `[mirror]` *frame* label, only the `[mirror]` *group* name carrying the origin axis. Name frames `[anchor] <feature> — <state name>` so each is a distinct Artifact Name (satisfying invariant I2: one `[anchor]` per Artifact Name). Lay frames out in a grid keyed off the state count (3-wide is usually right).
 
 **Step 5 — Verification.** After every batch, verify with `batch_get`. Only call `get_screenshot` once at the end of the mirror run, and accept that fresh inserts may take a turn or two to paint (per `pencil-rendering-quirks.md`). If a screenshot disagrees with `batch_get`, trust `batch_get` and move on. Update the manifest if any state's interactions or URL drift from what was discoverable in code.
 
@@ -435,7 +446,7 @@ Common candidates for any tabbed-feature mirror: `Header`, `ScoreBar`/summary, `
 A new `design/<feature>.pen` (or addition to an existing one) containing:
 - A `variables` block populated from the project's tokens
 - A scratch frame at the canvas edge with reusable components (header, row template, rail, etc.)
-- One state frame per `manifest.states` entry, named `[mirror] <state name>`
+- A dated `[mirror] <feature> — [YYYY-MM-DD]` origin group containing one `[anchor] <feature> — <state name>` frame per `manifest.states` entry
 - A title text node above the frame grid linking back to the manifest path
 
 Mirror mode does NOT update `[FEATURE]-IDEAS.md` or any spec doc. It's documentation, not specification.
@@ -446,7 +457,7 @@ Mirror mode does NOT update `[FEATURE]-IDEAS.md` or any spec doc. It's documenta
 - Use variant generation (Phase 1) when the goal is **new design within a locked direction**.
 - Use `/design-explore` when the goal is **discovering the direction itself**.
 
-A mirror frame can become a reference frame for downstream variant generation (referenced from `DESIGN-TAXONOMY.md`), but the skill won't promote it automatically — that's a human decision.
+A mirror `[anchor]` already plays the **mirror-baseline** reference role for downstream variant generation (Phase 0c reads it from `DESIGN-TAXONOMY.md`). It is *not* a `[final]` — it documents shipped UI, it is never implementable spec — and the skill never promotes it to `[final]`. Turning a mirror baseline into forward-looking spec is a human decision: run `/design-explore` (to set direction) then `/design-agent` (to generate `[variant]`s grounded by it).
 
 ---
 
