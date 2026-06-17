@@ -1,6 +1,6 @@
 {
   "name": "garage",
-  "version": "1.5.0",
+  "version": "1.6.0",
   "description": "Six-skill engineering pod for the full lifecycle: scaffold specs, research thin specs, brainstorm direction, generate variants, implement, verify visually. Spec-driven, with hard handoffs between skills that prevent silent assumptions.",
   "author": {
     "name": "Saurav Varma",

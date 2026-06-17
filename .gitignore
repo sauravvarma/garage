@@ -9,6 +9,9 @@ node_modules/
 # Local Claude Code state
 .claude/
 
+# Conductor workspace settings
+.conductor/
+
 # Skill-creator eval artifacts (per-iteration runs, fixtures, benchmarks)
 skills-workspace/
 
