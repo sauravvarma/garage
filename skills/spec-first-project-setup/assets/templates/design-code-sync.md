@@ -19,7 +19,7 @@ Applies when working on `.pen` files (or other design tool files).
 
 - **D1. Taxonomy lookup** — read `docs/DESIGN-TAXONOMY.md` artifact index. Identify which row(s) this work maps to. If none exists, add one before proceeding.
 - **D2. Frame naming** — every frame must follow the naming convention from `DESIGN-TAXONOMY.md`: `[label] Artifact — Letter: Description`. Proposal groups must be date-stamped. No unnamed or default frames.
-- **D3. Cleanup** — delete default/empty frames from `open_document`. No stray frames.
+- **D3. Cleanup** — delete the default/empty frame a newly-created `.pen` ships with. No stray frames.
 - **D4. Index update** — after creating frames, update artifact index with: one row per frame (not per artifact when variants exist), actual frame ID, correct lifecycle label, description matching the frame name.
 - **D5. Confirm** — every frame traces to an index row, IDs match, no strays, labels correct.
 

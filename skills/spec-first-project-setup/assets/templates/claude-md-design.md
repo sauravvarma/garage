@@ -13,6 +13,7 @@
 ## Pencil design file
 - **Path**: design/[project-name].pen
 - All Pencil MCP `filePath` parameters MUST use the absolute path to this file. Never use `/new`.
+- This file must already exist and be the **active editor** before any write. Pencil MCP cannot create files — `filePath` is advisory and the active editor wins, so a write to a missing/unopened path silently lands in whatever `.pen` is open. Create + open it in the Pencil app first.
 
 ## Read before implementing
 Before any feature or change, read the relevant docs:

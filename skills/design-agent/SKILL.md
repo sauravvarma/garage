@@ -72,7 +72,7 @@ This skill uses NO external MCP servers beyond Pencil MCP (the project's design 
 - `references/anti-patterns.md` — common design mistakes and AI slop detection
 - `references/taste-tuning.md` — configurable aesthetic parameters
 - `references/pencil-rendering-quirks.md` — known Pencil MCP rendering quirks (fresh-insert paint failures in cloned sheets, +50px y-offset on certain frames) and the clone-and-modify workaround
-- `references/pencil-hygiene.md` — the five upstream rules that prevent most rendering and maintenance pain (components-first, ID-binding discipline, batch_get-over-screenshots, design tokens as variables, real assets over placeholders)
+- `references/pencil-hygiene.md` — the six upstream rules that prevent most rendering and maintenance pain (components-first, ID-binding discipline, batch_get-over-screenshots, design tokens as variables, real assets over placeholders, and the Pencil write barrier / maker-checker gate)
 
 Read ALL six reference files at the start of every invocation — the critique pipeline in Phase 2 needs its full vocabulary loaded, the Pencil quirks reference must be loaded before any `batch_design` work to avoid burning a session on invisible-widget debugging, and the hygiene reference establishes the upstream rules that prevent most quirks from biting. Lazy-loading per phase causes the model to invent dimensions that aren't in the framework or rediscover the rendering quirks the hard way.
 
@@ -83,9 +83,10 @@ Read ALL six reference files at the start of every invocation — the critique p
 Resolve the design file path before ANY Pencil MCP call:
 
 1. Read `CLAUDE.md` for a `## Pencil design file` section. Found → use that absolute path for every call.
-2. Missing → create `design/[project-name].pen` and register it in CLAUDE.md under `## Pencil design file`.
-3. NEVER use `/new` (ephemeral unsaved document; work lost when the editor switches context).
-4. Same resolved path for every call. No switching mid-session.
+2. Missing → the path is `design/[project-name].pen`; register it in CLAUDE.md under `## Pencil design file`.
+3. **Before the first write, run the write-barrier gate** (`references/pencil-hygiene.md` Rule 6): confirm the target file exists on disk AND that `get_editor_state`'s active editor == the target. Pencil MCP **cannot create files** — `filePath` is advisory and the active editor wins, so a write to a missing-or-unopened path silently lands in whatever `.pen` is open. If the file is missing or not the active editor, STOP and ask the user to create + open it in Pencil at the exact path. Never write to "create" it.
+4. NEVER use `/new` (ephemeral unsaved document; work lost when the editor switches context).
+5. Same resolved path for every call. No switching mid-session.
 
 Folder layout is owned by `/spec-first-project-setup`; `.pen` files always go in `design/`.
 

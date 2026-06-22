@@ -195,7 +195,7 @@ label/ [variant] Hero Section — A: Side-by-side
 1. **Label always leads** — scannable in layer panels, instant lifecycle context.
 2. **Label changes, name doesn't** — on promotion/deprecation, rename only the bracket prefix.
 3. **Every `[concept]`, `[variant]`, `[anchor]`, or `[final]` frame gets a row in the artifact index** below. `[draft]` is too transient to index; `[deprecated]` keeps its existing row (relabeled in place).
-4. **No unnamed frames** — delete default/empty frames created by `open_document`.
+4. **No unnamed frames** — delete the default/empty frame a newly-created `.pen` ships with.
 5. **Origin groups are date-stamped** — so you know when the exploration/proposal/capture happened.
 6. **Candidates live only inside a dated group** (I3) — a bare `[concept]`/`[variant]` at the canvas root is invalid.
 

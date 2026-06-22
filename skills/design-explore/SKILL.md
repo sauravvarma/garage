@@ -120,10 +120,11 @@ Don't assume. The user saying "explore the contact page" when specs are locked m
 Resolve before any Pencil MCP call:
 
 1. Read `CLAUDE.md` for a `## Pencil design file` section. Found → use that absolute path for every call.
-2. Missing section → create `design/[project-name].pen` and register it in CLAUDE.md.
-3. Blank slate (no CLAUDE.md) → create `design/exploration.pen` as a scratch file; don't register it yet. Migrate when the user runs `/spec-first-project-setup`.
-4. NEVER use `/new` (ephemeral; work lost when the editor switches context).
-5. Same resolved path for every call.
+2. Missing section → the path is `design/[project-name].pen`; register it in CLAUDE.md.
+3. Blank slate (no CLAUDE.md) → the scratch path is `design/exploration.pen`; don't register it yet. Migrate when the user runs `/spec-first-project-setup`.
+4. **Pencil MCP cannot create files.** Before the first write, run the write-barrier gate: confirm the resolved target exists on disk AND that `get_editor_state`'s active editor == the target. `filePath` is advisory and the active editor wins — a write to a missing-or-unopened path silently lands in whatever `.pen` is open. If the file is missing or not active, STOP and ask the user to create + open it in Pencil at the exact path; never write to "create" it. (Full gate: design-agent's `references/pencil-hygiene.md` Rule 6.)
+5. NEVER use `/new` (ephemeral; work lost when the editor switches context).
+6. Same resolved path for every call.
 
 ### Frame naming for exploration
 

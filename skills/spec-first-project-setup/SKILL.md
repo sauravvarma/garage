@@ -192,10 +192,10 @@ Copy `assets/templates/repo-conventions.md` to `docs/REPO-CONVENTIONS.md`.
 Create `design/` directory for design tool files.
 
 **If the design tool is Pencil:**
-1. Create the `.pen` file via Pencil MCP: `open_document("design/[project-name].pen")`. Use the kebab-case project name from Step 1.
-2. The absolute path to this file is stored in CLAUDE.md (Step 12).
+1. The design file path is `design/[project-name].pen` (kebab-case project name from Step 1). Record this absolute path in CLAUDE.md (Step 12).
+2. **Pencil MCP cannot create `.pen` files** — its toolset has no create/open command, and a `batch_design` write to a non-existent path silently lands in whatever file is currently open (the `filePath` parameter is advisory; the active editor wins). So the file must be created in the **Pencil app**: ask the user to create a new document, save it at the exact `design/[project-name].pen` path, and keep it open. The downstream design skills verify the file exists and is the active editor before their first write (the write-barrier gate in design-agent's `references/pencil-hygiene.md` Rule 6).
 
-> ⚠️ **Never use `/new` as a `filePath`.** `/new` is an ephemeral unsaved document — work done there is lost when the editor switches context. Always create a named `.pen` file so work persists across sessions.
+> ⚠️ **Never use `/new` as a `filePath`,** and never use `batch_design` to "create" a file. `/new` is an ephemeral unsaved document — work done there is lost when the editor switches context. The named `.pen` must already exist and be open before any write.
 
 **If the design tool is not Pencil (or none):** create `design/` with a `.gitkeep`.
 

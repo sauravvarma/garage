@@ -6,7 +6,7 @@ The companion reference is `pencil-rendering-quirks.md` (paint-time bugs and the
 
 ---
 
-## The five hygiene rules
+## The six hygiene rules
 
 ### 1. Components-first when structure repeats more than twice
 
@@ -109,6 +109,24 @@ I(expandRow, { type: "ref", ref: chevronDown, width: 12, height: 12 })
 ```
 
 Do not use emoji glyphs (🌐, 👨‍⚕️) or arrow characters (↓, →, ›) as icon substitutes. They render inconsistently across systems and look like AI shortcuts in a portfolio piece. The two-minute extraction pass is always worth it.
+
+### 6. Pencil write barrier — verify the target before and after every write (maker-checker)
+
+Pencil MCP **cannot create files**, and its `filePath` parameter is *advisory*: the active editor wins. A `batch_design` call to a path that isn't the open document doesn't create or switch to it — it silently writes your nodes into whatever `.pen` is currently open, with no error.
+
+The cost of skipping this: you pollute an unrelated file. Concrete failure — a session targeting a not-yet-created `design/foo.pen` instead injected a screen frame plus orphan nodes into the client's open `hih-route-states.pen`; the API returned `OK` both for the bad write and for the cleanup `Delete`s. Nothing flagged it. The only reason it was caught was a node-count check against `get_editor_state`.
+
+Treat yourself as the **maker** and run a **checker** around every write:
+
+**Before the first write of a session (checker-before-maker):**
+1. **File exists** — confirm the resolved target path exists on disk (`test -f`). The PreToolUse hook (`hooks/pencil-filepath-guard.js`) also blocks `batch_design` to a non-existent path, but check proactively so you fail with a clear ask rather than on a blocked tool call.
+2. **Active editor matches** — call `get_editor_state` and confirm the active editor path **==** the resolved target. Mismatch → STOP and ask the user to open the target in Pencil. This check is mandatory; assume the active editor always wins.
+3. **File missing entirely** → STOP. Pencil MCP can't create it. Ask the user to create + open it in Pencil at the exact path, then register it in `CLAUDE.md`. Never attempt a write to "create" it.
+
+**After the first write batch (checker-after-maker):**
+- Verify it landed in the target: `stat` the target's mtime before/after the batch (filesystem-level, provider-independent), or read back a known sentinel node via `batch_get(filePath=<target>)`. If verification fails, a different open file may have been polluted — HALT and tell the user which file was previously active.
+
+**On resume:** Pencil is multiplayer and the active editor can change between turns. Re-affirm active-editor == target before resuming writes after any pause.
 
 ---
 
