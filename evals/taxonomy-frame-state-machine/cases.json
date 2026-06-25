@@ -1,0 +1,96 @@
+{
+  "suite": "taxonomy:frame-state-machine",
+  "skills_under_test": ["design-agent", "code-agent", "visual-qa"],
+  "what_it_guards": "The DESIGN-TAXONOMY.md frame state machine (three axes; six lifecycle states; invariants I1-I4). Every reader (design-agent Phase 0c, code-agent comp-read, visual-qa Phase 0d) must PROCEED on a clean/valid taxonomy and BLOCK (surface, don't guess) when an invariant is violated.",
+  "fixture_model": "base + per-snapshot overlay. Each snapshot composes the shared Streakly base with its own design/streakly.pen + docs/DESIGN-TAXONOMY.md. The .pen is generated headlessly from build/streakly.build.txt via fixtures/_lib/pen-build.sh (fixtures-as-code). At run time the runner extracts the .pen frame inventory to design/streakly.frames.txt via the Pencil CLI, so grading is fully automatable without the desktop app.",
+  "tiers": {
+    "1-automated": "Invariant / routing / proceed-vs-block cases gradeable from the markdown index (+ extracted frames.txt). No live Pencil.",
+    "2-live": "Cases needing real .pen geometry (composition fidelity). Run via Pencil CLI export; flagged per-case."
+  },
+  "grading": "Each expectation graded pass/fail against the executor transcript + post-run workdir (files-modified). A case passes only if every expectation passes.",
+  "snapshots": {
+    "T3-shipped": "VALID steady state: one [final]+Synced, one [anchor], deprecated losers in dated groups. Negative control — readers must NOT block.",
+    "V1-double-final": "INVALID: two [final] for 'Habit Tracker' (non-atomic promotion). I1 violation — readers must block.",
+    "T1-explore": "PENDING — direction-finding: [explore] group with [concept] A/B/C, no anchor/final yet.",
+    "T2-direction-locked": "PENDING — [anchor] + [proposal] with [variant]s, no [final] yet.",
+    "T4-mirror": "PENDING — [mirror] group with per-state [anchor] baselines + existing [final].",
+    "V2-pen-index-drift": "PENDING (Tier-2 leaning): .pen has two [final] but index shows one — tests cross-check of .pen vs index."
+  },
+  "cases": [
+    {
+      "id": "T3-code-agent-proceeds",
+      "tier": 1,
+      "snapshot": "T3-shipped",
+      "skill": "code-agent",
+      "behavior": "valid taxonomy → implement against the single [final], no spurious block",
+      "prompt": "Use the /code-agent skill to implement the Habit Tracker /habits route described in docs/HABIT-TRACKER-IDEAS.md, against the design comp. Follow CLAUDE.md and docs/DESIGN-TAXONOMY.md. Do whatever the skill says.",
+      "expectations": [
+        { "text": "Validates I1 and finds exactly one [final] (B: Single-column card stack) for Habit Tracker; does NOT block on the taxonomy", "evidence_hint": "names the single [final] as the implementable comp" },
+        { "text": "Does NOT treat [anchor]/[deprecated] frames as implementable spec", "evidence_hint": "only [final] cited as spec" },
+        { "text": "Proceeds to implement (no taxonomy-invalid refusal)", "evidence_hint": "produces a plan / code, no block message" }
+      ]
+    },
+    {
+      "id": "T3-design-agent-references",
+      "tier": 1,
+      "snapshot": "T3-shipped",
+      "skill": "design-agent",
+      "behavior": "valid taxonomy → Phase 0c gathers reference frames, invariants pass, proceeds",
+      "prompt": "Use the /design-agent skill to produce a variant for a NEW adjacent feature (a weekly stats panel). Read docs/DESIGN-TAXONOMY.md for reference frames. Do whatever the skill says.",
+      "expectations": [
+        { "text": "Phase 0c passes I1/I2/I3 (one [final], one [anchor], candidates in dated groups) — no block", "evidence_hint": "invariant check passes" },
+        { "text": "Identifies the [anchor] (Warm Ember) as the direction anchor and the [final] as a pattern source", "evidence_hint": "names anchor + final by role" },
+        { "text": "Does not copy content/inventory from the reference frames", "evidence_hint": "reference = proportion/feel only" }
+      ]
+    },
+    {
+      "id": "T3-visual-qa-baseline",
+      "tier": 1,
+      "snapshot": "T3-shipped",
+      "skill": "visual-qa",
+      "behavior": "valid taxonomy → comparison reference = the [final]+Synced frame",
+      "prompt": "Use the /visual-qa skill to check the /habits route against its design comp. Read docs/DESIGN-TAXONOMY.md. Do whatever the skill says (you may stop once the comparison baseline is chosen).",
+      "expectations": [
+        { "text": "Phase 0d validates I1 (one [final]) — no block", "evidence_hint": "I1 ok" },
+        { "text": "Picks the [final]+Synced frame (B: Single-column card stack) as the comparison baseline", "evidence_hint": "names [final]+Synced as reference" }
+      ]
+    },
+    {
+      "id": "V1-code-agent-blocks",
+      "tier": 1,
+      "snapshot": "V1-double-final",
+      "skill": "code-agent",
+      "behavior": "I1 violation → stop and surface, do not implement",
+      "prompt": "Use the /code-agent skill to implement the Habit Tracker /habits route against the design comp. Follow CLAUDE.md and docs/DESIGN-TAXONOMY.md. Do whatever the skill says.",
+      "expectations": [
+        { "text": "Detects two [final] frames for 'Habit Tracker' (B: Single-column and A: Two-pane) — I1 violation", "evidence_hint": "names both finals / cites I1" },
+        { "text": "STOPS and surfaces rather than guessing which [final] is authoritative", "evidence_hint": "no arbitrary pick" },
+        { "text": "Writes no source files; asks to resolve (one → [deprecated]) before implementing", "evidence_hint": "files-modified under src/ = none" }
+      ]
+    },
+    {
+      "id": "V1-design-agent-blocks",
+      "tier": 1,
+      "snapshot": "V1-double-final",
+      "skill": "design-agent",
+      "behavior": "Phase 0c I1 violation → block",
+      "prompt": "Use the /design-agent skill to produce a variant for a new adjacent feature. Read docs/DESIGN-TAXONOMY.md for reference frames. Do whatever the skill says.",
+      "expectations": [
+        { "text": "Phase 0c invariant check fails on I1 (two [final] for Habit Tracker) and blocks", "evidence_hint": "cites I1 + the two finals" },
+        { "text": "Surfaces the invalid state with the atomic-promotion explanation; does not generate variants on top of it", "evidence_hint": "block message, no variants produced" }
+      ]
+    },
+    {
+      "id": "V1-visual-qa-blocks",
+      "tier": 1,
+      "snapshot": "V1-double-final",
+      "skill": "visual-qa",
+      "behavior": "Phase 0d I1 violation → surface as finding, don't pick arbitrary baseline",
+      "prompt": "Use the /visual-qa skill to check the /habits route against its design comp. Read docs/DESIGN-TAXONOMY.md. Do whatever the skill says.",
+      "expectations": [
+        { "text": "Phase 0d detects two [final] for the route and surfaces it as a finding", "evidence_hint": "cites two finals" },
+        { "text": "Does NOT silently compare against an arbitrary [final]", "evidence_hint": "refuses to pick baseline until one is deprecated" }
+      ]
+    }
+  ]
+}

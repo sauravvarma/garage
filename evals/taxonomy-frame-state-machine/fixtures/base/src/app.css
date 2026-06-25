@@ -1,0 +1,25 @@
+:root {
+  --color-surface: #0f1115;
+  --color-card: #191c22;
+  --color-text: #e8eaed;
+  --color-text-muted: #9aa0a6;
+  --color-accent: #ff7a45;
+  --color-accent-press: #e85f29;
+  --color-success: #3ecf8e;
+  --color-danger: #ef5350;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 16px;
+  --space-4: 24px;
+  --radius-card: 12px;
+  --width-content: 560px;
+  --font-size-display: 32px;
+  --font-size-body: 15px;
+}
+
+body {
+  margin: 0;
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: var(--font-size-body);
+}
