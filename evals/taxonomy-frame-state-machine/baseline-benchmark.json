@@ -1,0 +1,55 @@
+{
+  "metadata": {
+    "suite": "taxonomy:frame-state-machine",
+    "skill_path": "/Users/sauravvarma/conductor/workspaces/garage/muscat/skills",
+    "skills_under_test": ["design-agent", "code-agent", "visual-qa"],
+    "executor_model": "claude-opus-4-8[1m]",
+    "timestamp": "2026-06-25T16:50:00Z",
+    "run": "20260625-164408",
+    "fixture": "Streakly (synthetic SvelteKit habit tracker); base + per-snapshot overlay (design/streakly.pen + docs/DESIGN-TAXONOMY.md). .pen fixtures generated headless via fixtures/_lib/pen-build.sh; frame inventory extracted to design/streakly.frames.txt via the Pencil CLI at compose time.",
+    "runs_per_case": 1,
+    "isolation": "one general-purpose subagent per case, isolated composed workdir, skill read from SKILL.md (loaded plugin not invoked), NO Pencil desktop app / MCP — graders read the markdown index + CLI-extracted frames.txt; no dev server / npm / browser / network",
+    "result": "6/6 cases pass; 17/17 expectations pass",
+    "snapshots_covered": ["T3-shipped (valid)", "V1-double-final (I1 violation)"],
+    "snapshots_pending": ["T1-explore", "T2-direction-locked", "T4-mirror", "V2-pen-index-drift"]
+  },
+  "runs": [
+    { "case_id": "T3-code-agent-proceeds", "skill": "code-agent", "snapshot": "T3-shipped", "result": {"pass_rate": 1.0, "passed": 3, "failed": 0, "total": 3},
+      "expectations": [
+        {"text": "Validates I1, finds exactly one [final] (B), does not block", "passed": true, "evidence": "one [final] nQjWk Synced; I1 passes; proceeded"},
+        {"text": "Does not treat [anchor]/[deprecated] as implementable spec", "passed": true, "evidence": "implemented against [final] B only; anchor/deprecated excluded"},
+        {"text": "Proceeds to implement (no taxonomy-invalid refusal)", "passed": true, "evidence": "built /habits store+route+components (6 src files)"}
+      ],
+      "notes": "Also held token discipline (added missing --motion-flame, used content-width formula) and synced docs — consistent with code-agent's design-code contract." },
+    { "case_id": "T3-design-agent-references", "skill": "design-agent", "snapshot": "T3-shipped", "result": {"pass_rate": 1.0, "passed": 3, "failed": 0, "total": 3},
+      "expectations": [
+        {"text": "Phase 0c passes I1/I2/I3 — no block", "passed": true, "evidence": "1 [final], 1 [anchor], 0 loose candidates; all pass"},
+        {"text": "Identifies [anchor] (Warm Ember) as direction anchor and [final] as pattern source", "passed": true, "evidence": "named both by role; no mirror baseline (not a redesign)"},
+        {"text": "Does not copy content/inventory from reference frames", "passed": true, "evidence": "reference = proportion/feel only; content from docs"}
+      ],
+      "notes": "Bonus-correct: flagged that the requested NEW feature has no WEEKLY-STATS-IDEAS.md, so the feature-doc preflight (separate from the invariant gate) would route to /design-explore before Phase 1. Invariant gate itself is green = proceed, as expected." },
+    { "case_id": "T3-visual-qa-baseline", "skill": "visual-qa", "snapshot": "T3-shipped", "result": {"pass_rate": 1.0, "passed": 2, "failed": 0, "total": 2},
+      "expectations": [
+        {"text": "Phase 0d validates I1 (one [final]) — no block", "passed": true, "evidence": "one [final]; I1 passes"},
+        {"text": "Picks the [final]+Synced frame as comparison baseline", "passed": true, "evidence": "selected nQjWk (B: Single-column card stack), Synced"}
+      ] },
+    { "case_id": "V1-code-agent-blocks", "skill": "code-agent", "snapshot": "V1-double-final", "result": {"pass_rate": 1.0, "passed": 3, "failed": 0, "total": 3},
+      "expectations": [
+        {"text": "Detects two [final] for Habit Tracker — I1 violation", "passed": true, "evidence": "cited RBqcO (Not started) + C87F8 (Synced); both in index + frames.txt"},
+        {"text": "STOPS and surfaces rather than guessing which [final] is authoritative", "passed": true, "evidence": "refused to act on the 'replace' hint; asked user to resolve"},
+        {"text": "Writes no source files; asks to resolve before implementing", "passed": true, "evidence": "files-modified = none; instructed deprecate the non-current final"}
+      ] },
+    { "case_id": "V1-design-agent-blocks", "skill": "design-agent", "snapshot": "V1-double-final", "result": {"pass_rate": 1.0, "passed": 2, "failed": 0, "total": 2},
+      "expectations": [
+        {"text": "Phase 0c invariant check fails on I1 and blocks", "passed": true, "evidence": "two [final] (C87F8/RBqcO); blocked with atomic-promotion explanation"},
+        {"text": "Surfaces invalid state; does not generate variants on top of it", "passed": true, "evidence": "no variants produced; files = none"}
+      ] },
+    { "case_id": "V1-visual-qa-blocks", "skill": "visual-qa", "snapshot": "V1-double-final", "result": {"pass_rate": 1.0, "passed": 2, "failed": 0, "total": 2},
+      "expectations": [
+        {"text": "Phase 0d detects two [final] and surfaces as a finding", "passed": true, "evidence": "cited both finals + conflicting sync states"},
+        {"text": "Does NOT silently compare against an arbitrary [final]", "passed": true, "evidence": "declined to pick baseline until one is deprecated"}
+      ] }
+  ],
+  "findings": [],
+  "notes": "First baseline for the taxonomy suite. Demonstrates the headless-CLI automation path end to end: workdirs composed + .pen inventory extracted via the Pencil CLI (no desktop app), readers graded from the markdown index + frames.txt. All three readers enforce I1 consistently (proceed on T3, block on V1) and refuse to guess which terminal is authoritative. Extend with T1/T2/T4 (valid lifecycle stages) and V2 (.pen-vs-index drift) next."
+}
