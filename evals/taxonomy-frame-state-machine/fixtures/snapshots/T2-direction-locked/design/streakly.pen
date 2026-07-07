@@ -1,0 +1,610 @@
+{
+  "version": "2.13",
+  "children": [
+    {
+      "type": "frame",
+      "id": "PLNlf",
+      "x": 0,
+      "y": 0,
+      "name": "component/ HabitCard",
+      "reusable": true,
+      "width": 344,
+      "fill": "$color-card",
+      "cornerRadius": "$radius-card",
+      "gap": "$space-3",
+      "padding": "$space-3",
+      "justifyContent": "space_between",
+      "alignItems": "center",
+      "children": [
+        {
+          "type": "frame",
+          "id": "w6f9O",
+          "name": "Text",
+          "layout": "vertical",
+          "gap": "$space-1",
+          "children": [
+            {
+              "type": "text",
+              "id": "RnL8s",
+              "name": "Name",
+              "fill": "$color-text",
+              "content": "Morning run",
+              "fontFamily": "Inter",
+              "fontSize": "$font-size-body",
+              "fontWeight": "600"
+            },
+            {
+              "type": "text",
+              "id": "ypVTV",
+              "name": "Sub",
+              "fill": "$color-text-muted",
+              "content": "Tap to complete today",
+              "fontFamily": "Inter",
+              "fontSize": 13,
+              "fontWeight": "normal"
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "lOjaL",
+          "name": "Streak",
+          "gap": "$space-1",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "icon",
+              "id": "M5lChl",
+              "name": "Flame",
+              "width": 24,
+              "height": 24,
+              "icon": "flame",
+              "library": "lucide",
+              "fill": "$color-accent"
+            },
+            {
+              "type": "text",
+              "id": "uXzNV",
+              "name": "Count",
+              "fill": "$color-text",
+              "content": "12",
+              "fontFamily": "Inter",
+              "fontSize": "$font-size-display",
+              "fontWeight": "700"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "group",
+      "id": "YZRUh",
+      "x": 0,
+      "y": 900,
+      "name": "[proposal] Habit Tracker — 2026-05-25",
+      "children": [
+        {
+          "type": "frame",
+          "id": "DCKPe",
+          "x": 0,
+          "y": 0,
+          "name": "[variant] Habit Tracker — A: Two-pane split",
+          "clip": true,
+          "width": 390,
+          "height": 760,
+          "fill": "$color-surface",
+          "gap": "$space-3",
+          "padding": "$space-4",
+          "children": [
+            {
+              "type": "frame",
+              "id": "PyzEW",
+              "name": "List pane",
+              "width": 160,
+              "height": "fill_container",
+              "fill": "$color-card",
+              "cornerRadius": "$radius-card",
+              "layout": "vertical",
+              "gap": "$space-2"
+            },
+            {
+              "type": "frame",
+              "id": "r1EkUL",
+              "name": "Detail pane",
+              "width": "fill_container",
+              "height": "fill_container",
+              "fill": "$color-card",
+              "cornerRadius": "$radius-card",
+              "layout": "vertical",
+              "gap": "$space-2",
+              "padding": "$space-3",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "xcv4h",
+                  "name": "Title",
+                  "fill": "$color-text",
+                  "content": "Morning run",
+                  "fontFamily": "Inter",
+                  "fontSize": 22,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "text",
+                  "id": "Sc3Kz",
+                  "name": "Note",
+                  "fill": "$color-text-muted",
+                  "content": "Composition candidate — habit list left, streak detail right",
+                  "fontFamily": "Inter",
+                  "fontSize": 13,
+                  "fontWeight": "normal"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "Otu6L",
+          "x": 440,
+          "y": 0,
+          "name": "[variant] Habit Tracker — B: Single-column card stack",
+          "clip": true,
+          "width": 390,
+          "height": 760,
+          "fill": "$color-surface",
+          "layout": "vertical",
+          "gap": "$space-3",
+          "padding": "$space-4",
+          "children": [
+            {
+              "type": "frame",
+              "id": "pqO7Z",
+              "name": "Header",
+              "width": "fill_container",
+              "justifyContent": "space_between",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "H2cYcX",
+                  "name": "Title",
+                  "fill": "$color-text",
+                  "content": "Today",
+                  "fontFamily": "Inter",
+                  "fontSize": 28,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "frame",
+                  "id": "piTG2",
+                  "name": "Add",
+                  "fill": "$color-accent",
+                  "cornerRadius": "$radius-card",
+                  "gap": "$space-1",
+                  "padding": [
+                    "$space-2",
+                    "$space-3"
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "g0pXLN",
+                      "name": "Plus",
+                      "width": 16,
+                      "height": 16,
+                      "icon": "plus",
+                      "library": "lucide",
+                      "fill": "$color-surface"
+                    },
+                    {
+                      "type": "text",
+                      "id": "Sbvyz",
+                      "name": "Label",
+                      "fill": "$color-surface",
+                      "content": "New habit",
+                      "fontFamily": "Inter",
+                      "fontSize": "$font-size-body",
+                      "fontWeight": "600"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "xci07",
+              "name": "Card stack",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": "$space-3",
+              "children": [
+                {
+                  "id": "N0AFr",
+                  "type": "ref",
+                  "ref": "PLNlf",
+                  "name": "Card — Morning run",
+                  "width": "fill_container",
+                  "descendants": {
+                    "RnL8s": {
+                      "content": "Morning run"
+                    },
+                    "ypVTV": {
+                      "content": "Tap to complete today"
+                    },
+                    "uXzNV": {
+                      "content": "12"
+                    }
+                  }
+                },
+                {
+                  "id": "KZeXK",
+                  "type": "ref",
+                  "ref": "PLNlf",
+                  "name": "Card — Read 20 pages",
+                  "width": "fill_container",
+                  "descendants": {
+                    "RnL8s": {
+                      "content": "Read 20 pages"
+                    },
+                    "ypVTV": {
+                      "content": "Tap to complete today"
+                    },
+                    "uXzNV": {
+                      "content": "5"
+                    }
+                  }
+                },
+                {
+                  "id": "lNfxV",
+                  "type": "ref",
+                  "ref": "PLNlf",
+                  "name": "Card — No sugar",
+                  "width": "fill_container",
+                  "descendants": {
+                    "RnL8s": {
+                      "content": "No sugar"
+                    },
+                    "ypVTV": {
+                      "content": "Completed"
+                    },
+                    "uXzNV": {
+                      "content": "31"
+                    }
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "YemjA",
+          "x": 880,
+          "y": 0,
+          "name": "[variant] Habit Tracker — C: Compact rows",
+          "clip": true,
+          "width": 390,
+          "height": 760,
+          "fill": "$color-surface",
+          "layout": "vertical",
+          "gap": "$space-2",
+          "padding": "$space-4",
+          "children": [
+            {
+              "type": "text",
+              "id": "ODC2f",
+              "name": "Title",
+              "fill": "$color-text",
+              "content": "Today",
+              "fontFamily": "Inter",
+              "fontSize": 28,
+              "fontWeight": "700"
+            },
+            {
+              "type": "text",
+              "id": "Q2Mqzo",
+              "name": "Row 1",
+              "fill": "$color-text",
+              "content": "Morning run — 12",
+              "fontFamily": "Inter",
+              "fontSize": "$font-size-body",
+              "fontWeight": "normal"
+            },
+            {
+              "type": "text",
+              "id": "vhaWf",
+              "name": "Row 2",
+              "fill": "$color-text",
+              "content": "Read 20 pages — 5",
+              "fontFamily": "Inter",
+              "fontSize": "$font-size-body",
+              "fontWeight": "normal"
+            },
+            {
+              "type": "text",
+              "id": "JjznI",
+              "name": "Row 3",
+              "fill": "$color-text",
+              "content": "No sugar — 31",
+              "fontFamily": "Inter",
+              "fontSize": "$font-size-body",
+              "fontWeight": "normal"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "group",
+      "id": "UESgh",
+      "x": 0,
+      "y": 0,
+      "name": "[explore] Habit Tracker direction — 2026-05-20",
+      "children": [
+        {
+          "type": "frame",
+          "id": "q6rVI",
+          "x": 0,
+          "y": 0,
+          "name": "[anchor] Habit Tracker — Warm Ember (direction)",
+          "clip": true,
+          "width": 390,
+          "height": 760,
+          "fill": "$color-surface",
+          "layout": "vertical",
+          "gap": "$space-4",
+          "padding": "$space-4",
+          "children": [
+            {
+              "type": "text",
+              "id": "fY9AF",
+              "name": "Mood",
+              "fill": "$color-text",
+              "content": "Warm Ember",
+              "fontFamily": "Inter",
+              "fontSize": 28,
+              "fontWeight": "700"
+            },
+            {
+              "type": "text",
+              "id": "dGQ3o",
+              "name": "Desc",
+              "fill": "$color-text-muted",
+              "textGrowth": "fixed-width",
+              "width": "fill_container",
+              "content": "Dark surface, one warm flame accent, oversized streak numerals. Calm until you complete, then the flame pops.",
+              "fontFamily": "Inter",
+              "fontSize": "$font-size-body",
+              "fontWeight": "normal"
+            },
+            {
+              "type": "frame",
+              "id": "Y1hFMM",
+              "name": "Swatches",
+              "width": "fill_container",
+              "gap": "$space-2",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "LmuMK",
+                  "name": "Swatch surface",
+                  "width": 64,
+                  "height": 64,
+                  "fill": "$color-surface",
+                  "cornerRadius": "$radius-card",
+                  "stroke": "$color-card",
+                  "strokeWidth": 1
+                },
+                {
+                  "type": "frame",
+                  "id": "KQCFY",
+                  "name": "Swatch card",
+                  "width": 64,
+                  "height": 64,
+                  "fill": "$color-card",
+                  "cornerRadius": "$radius-card",
+                  "stroke": "$color-card",
+                  "strokeWidth": 1
+                },
+                {
+                  "type": "frame",
+                  "id": "b2Xjct",
+                  "name": "Swatch accent",
+                  "width": 64,
+                  "height": 64,
+                  "fill": "$color-accent",
+                  "cornerRadius": "$radius-card",
+                  "stroke": "$color-card",
+                  "strokeWidth": 1
+                },
+                {
+                  "type": "frame",
+                  "id": "rOqgc",
+                  "name": "Swatch success",
+                  "width": 64,
+                  "height": 64,
+                  "fill": "$color-success",
+                  "cornerRadius": "$radius-card",
+                  "stroke": "$color-card",
+                  "strokeWidth": 1
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "ozPAO",
+              "name": "Hero streak",
+              "width": "fill_container",
+              "fill": "$color-card",
+              "cornerRadius": "$radius-card",
+              "gap": "$space-2",
+              "padding": "$space-4",
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "G9EYrZ",
+                  "name": "Flame",
+                  "width": 48,
+                  "height": 48,
+                  "icon": "flame",
+                  "library": "lucide",
+                  "fill": "$color-accent"
+                },
+                {
+                  "type": "text",
+                  "id": "kf3To",
+                  "name": "Big",
+                  "fill": "$color-text",
+                  "content": "31",
+                  "fontFamily": "Inter",
+                  "fontSize": 64,
+                  "fontWeight": "800"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "q2OgS9",
+          "x": 440,
+          "y": 0,
+          "name": "[deprecated] Habit Tracker — A: Cool Grid",
+          "opacity": 0.5,
+          "clip": true,
+          "width": 390,
+          "height": 760,
+          "fill": "$color-surface",
+          "layout": "vertical",
+          "gap": "$space-3",
+          "padding": "$space-4",
+          "children": [
+            {
+              "type": "text",
+              "id": "bx9vn",
+              "name": "Title",
+              "fill": "$color-text",
+              "content": "Streakly",
+              "fontFamily": "Inter",
+              "fontSize": 28,
+              "fontWeight": "700"
+            },
+            {
+              "type": "text",
+              "id": "ND9Ra",
+              "name": "Note",
+              "fill": "$color-text-muted",
+              "content": "Deprecated — lost direction decision 2026-05-20",
+              "fontFamily": "Inter",
+              "fontSize": 13,
+              "fontWeight": "normal"
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "zw5ca",
+          "x": 880,
+          "y": 0,
+          "name": "[deprecated] Habit Tracker — C: Mono Ledger",
+          "opacity": 0.5,
+          "clip": true,
+          "width": 390,
+          "height": 760,
+          "fill": "$color-surface",
+          "layout": "vertical",
+          "gap": "$space-3",
+          "padding": "$space-4",
+          "children": [
+            {
+              "type": "text",
+              "id": "CDTK0",
+              "name": "Title",
+              "fill": "$color-text",
+              "content": "Streakly",
+              "fontFamily": "Inter",
+              "fontSize": 28,
+              "fontWeight": "700"
+            },
+            {
+              "type": "text",
+              "id": "lZo7V",
+              "name": "Note",
+              "fill": "$color-text-muted",
+              "content": "Deprecated — lost direction decision 2026-05-20",
+              "fontFamily": "Inter",
+              "fontSize": 13,
+              "fontWeight": "normal"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "variables": {
+    "color-surface": {
+      "type": "color",
+      "value": "#0f1115"
+    },
+    "color-card": {
+      "type": "color",
+      "value": "#191c22"
+    },
+    "color-text": {
+      "type": "color",
+      "value": "#e8eaed"
+    },
+    "color-text-muted": {
+      "type": "color",
+      "value": "#9aa0a6"
+    },
+    "color-accent": {
+      "type": "color",
+      "value": "#ff7a45"
+    },
+    "color-accent-press": {
+      "type": "color",
+      "value": "#e85f29"
+    },
+    "color-success": {
+      "type": "color",
+      "value": "#3ecf8e"
+    },
+    "color-danger": {
+      "type": "color",
+      "value": "#ef5350"
+    },
+    "font-size-body": {
+      "type": "number",
+      "value": 15
+    },
+    "font-size-display": {
+      "type": "number",
+      "value": 32
+    },
+    "space-1": {
+      "type": "number",
+      "value": 4
+    },
+    "space-2": {
+      "type": "number",
+      "value": 8
+    },
+    "space-3": {
+      "type": "number",
+      "value": 16
+    },
+    "space-4": {
+      "type": "number",
+      "value": 24
+    },
+    "radius-card": {
+      "type": "number",
+      "value": 12
+    }
+  }
+}
