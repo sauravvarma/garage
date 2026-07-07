@@ -1,0 +1,353 @@
+{
+  "version": "2.13",
+  "children": [
+    {
+      "type": "group",
+      "id": "X8hB9C",
+      "x": 0,
+      "y": 0,
+      "name": "[explore] Habit Tracker direction — 2026-05-20",
+      "children": [
+        {
+          "type": "frame",
+          "id": "jKu7M",
+          "x": 0,
+          "y": 0,
+          "name": "[concept] Habit Tracker — A: Cool Grid",
+          "clip": true,
+          "width": 390,
+          "height": 760,
+          "fill": "$color-surface",
+          "layout": "vertical",
+          "gap": "$space-3",
+          "padding": "$space-4",
+          "children": [
+            {
+              "type": "text",
+              "id": "WDRLZ",
+              "name": "Mood",
+              "fill": "$color-text",
+              "content": "Cool Grid",
+              "fontFamily": "Inter",
+              "fontSize": 28,
+              "fontWeight": "700"
+            },
+            {
+              "type": "text",
+              "id": "HOHln",
+              "name": "Desc",
+              "fill": "$color-text-muted",
+              "textGrowth": "fixed-width",
+              "width": "fill_container",
+              "content": "Cool slate palette, dense grid of habit tiles. Everything visible at once, spreadsheet calm.",
+              "fontFamily": "Inter",
+              "fontSize": "$font-size-body",
+              "fontWeight": "normal"
+            },
+            {
+              "type": "frame",
+              "id": "tQxue",
+              "name": "Tile grid",
+              "width": "fill_container",
+              "gap": "$space-2",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "Ny3Wc",
+                  "name": "Tile 1",
+                  "width": 104,
+                  "height": 104,
+                  "fill": "$color-card",
+                  "cornerRadius": "$radius-card"
+                },
+                {
+                  "type": "frame",
+                  "id": "u2ycOA",
+                  "name": "Tile 2",
+                  "width": 104,
+                  "height": 104,
+                  "fill": "$color-card",
+                  "cornerRadius": "$radius-card"
+                },
+                {
+                  "type": "frame",
+                  "id": "wJxZX",
+                  "name": "Tile 3",
+                  "width": 104,
+                  "height": 104,
+                  "fill": "$color-card",
+                  "cornerRadius": "$radius-card"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "VaLCk",
+          "x": 440,
+          "y": 0,
+          "name": "[concept] Habit Tracker — B: Warm Ember",
+          "clip": true,
+          "width": 390,
+          "height": 760,
+          "fill": "$color-surface",
+          "layout": "vertical",
+          "gap": "$space-4",
+          "padding": "$space-4",
+          "children": [
+            {
+              "type": "text",
+              "id": "K7uLvQ",
+              "name": "Mood",
+              "fill": "$color-text",
+              "content": "Warm Ember",
+              "fontFamily": "Inter",
+              "fontSize": 28,
+              "fontWeight": "700"
+            },
+            {
+              "type": "text",
+              "id": "SzS3B",
+              "name": "Desc",
+              "fill": "$color-text-muted",
+              "textGrowth": "fixed-width",
+              "width": "fill_container",
+              "content": "Dark surface, one warm flame accent, oversized streak numerals. Calm until you complete, then the flame pops.",
+              "fontFamily": "Inter",
+              "fontSize": "$font-size-body",
+              "fontWeight": "normal"
+            },
+            {
+              "type": "frame",
+              "id": "lWYWA",
+              "name": "Swatches",
+              "width": "fill_container",
+              "gap": "$space-2",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "N8JuIn",
+                  "name": "Swatch surface",
+                  "width": 64,
+                  "height": 64,
+                  "fill": "$color-surface",
+                  "cornerRadius": "$radius-card",
+                  "stroke": "$color-card",
+                  "strokeWidth": 1
+                },
+                {
+                  "type": "frame",
+                  "id": "n7ROth",
+                  "name": "Swatch card",
+                  "width": 64,
+                  "height": 64,
+                  "fill": "$color-card",
+                  "cornerRadius": "$radius-card",
+                  "stroke": "$color-card",
+                  "strokeWidth": 1
+                },
+                {
+                  "type": "frame",
+                  "id": "JW83h",
+                  "name": "Swatch accent",
+                  "width": 64,
+                  "height": 64,
+                  "fill": "$color-accent",
+                  "cornerRadius": "$radius-card",
+                  "stroke": "$color-card",
+                  "strokeWidth": 1
+                },
+                {
+                  "type": "frame",
+                  "id": "CZTAA",
+                  "name": "Swatch success",
+                  "width": 64,
+                  "height": 64,
+                  "fill": "$color-success",
+                  "cornerRadius": "$radius-card",
+                  "stroke": "$color-card",
+                  "strokeWidth": 1
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "fdJ5N",
+              "name": "Hero streak",
+              "width": "fill_container",
+              "fill": "$color-card",
+              "cornerRadius": "$radius-card",
+              "gap": "$space-2",
+              "padding": "$space-4",
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "rt5me",
+                  "name": "Flame",
+                  "width": 48,
+                  "height": 48,
+                  "icon": "flame",
+                  "library": "lucide",
+                  "fill": "$color-accent"
+                },
+                {
+                  "type": "text",
+                  "id": "qDf4n",
+                  "name": "Big",
+                  "fill": "$color-text",
+                  "content": "31",
+                  "fontFamily": "Inter",
+                  "fontSize": 64,
+                  "fontWeight": "800"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "bZD0k",
+          "x": 880,
+          "y": 0,
+          "name": "[concept] Habit Tracker — C: Mono Ledger",
+          "clip": true,
+          "width": 390,
+          "height": 760,
+          "fill": "$color-surface",
+          "layout": "vertical",
+          "gap": "$space-3",
+          "padding": "$space-4",
+          "children": [
+            {
+              "type": "text",
+              "id": "KqvTf",
+              "name": "Mood",
+              "fill": "$color-text",
+              "content": "Mono Ledger",
+              "fontFamily": "Inter",
+              "fontSize": 28,
+              "fontWeight": "700"
+            },
+            {
+              "type": "text",
+              "id": "oWXWq",
+              "name": "Desc",
+              "fill": "$color-text-muted",
+              "textGrowth": "fixed-width",
+              "width": "fill_container",
+              "content": "Monochrome ledger rows, typographic streak tallies, no chrome. A quiet daily register.",
+              "fontFamily": "Inter",
+              "fontSize": "$font-size-body",
+              "fontWeight": "normal"
+            },
+            {
+              "type": "frame",
+              "id": "e9vIv",
+              "name": "Ledger rows",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": "$space-2",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "HqZci",
+                  "name": "Row 1",
+                  "fill": "$color-text",
+                  "content": "Morning run ........ 12",
+                  "fontFamily": "Inter",
+                  "fontSize": "$font-size-body",
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "text",
+                  "id": "lb5wS",
+                  "name": "Row 2",
+                  "fill": "$color-text",
+                  "content": "Read 20 pages ...... 5",
+                  "fontFamily": "Inter",
+                  "fontSize": "$font-size-body",
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "text",
+                  "id": "tGC1n",
+                  "name": "Row 3",
+                  "fill": "$color-text",
+                  "content": "No sugar ........... 31",
+                  "fontFamily": "Inter",
+                  "fontSize": "$font-size-body",
+                  "fontWeight": "normal"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "variables": {
+    "color-surface": {
+      "type": "color",
+      "value": "#0f1115"
+    },
+    "color-card": {
+      "type": "color",
+      "value": "#191c22"
+    },
+    "color-text": {
+      "type": "color",
+      "value": "#e8eaed"
+    },
+    "color-text-muted": {
+      "type": "color",
+      "value": "#9aa0a6"
+    },
+    "color-accent": {
+      "type": "color",
+      "value": "#ff7a45"
+    },
+    "color-accent-press": {
+      "type": "color",
+      "value": "#e85f29"
+    },
+    "color-success": {
+      "type": "color",
+      "value": "#3ecf8e"
+    },
+    "color-danger": {
+      "type": "color",
+      "value": "#ef5350"
+    },
+    "font-size-body": {
+      "type": "number",
+      "value": 15
+    },
+    "font-size-display": {
+      "type": "number",
+      "value": 32
+    },
+    "space-1": {
+      "type": "number",
+      "value": 4
+    },
+    "space-2": {
+      "type": "number",
+      "value": 8
+    },
+    "space-3": {
+      "type": "number",
+      "value": 16
+    },
+    "space-4": {
+      "type": "number",
+      "value": 24
+    },
+    "radius-card": {
+      "type": "number",
+      "value": 12
+    }
+  }
+}

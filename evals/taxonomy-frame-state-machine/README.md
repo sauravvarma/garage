@@ -31,10 +31,10 @@ taxonomy-frame-state-machine/
 |---|---|---|
 | `T3-shipped` | **valid** steady state (1 `[final]`+Synced, 1 `[anchor]`, deprecated losers) | readers must **not** block (negative control) |
 | `V1-double-final` | **invalid**: two `[final]` for one Artifact Name (non-atomic promotion) | **I1** → readers must block |
-| `T1-explore` | _pending_ — `[explore]` + `[concept]` A/B/C, no anchor/final | no reference anchor yet; I3 holds |
-| `T2-direction-locked` | _pending_ — `[anchor]` + `[proposal]` `[variant]`s, no `[final]` | reference = anchor only |
-| `T4-mirror` | _pending_ — `[mirror]` `[anchor]` baselines + `[final]` | mirror-baseline role; I2 |
-| `V2-pen-index-drift` | _pending_ — `.pen` has two `[final]`, index shows one | cross-check `.pen` vs index |
+| `T1-explore` | **valid** mid-explore: `[explore]` + `[concept]` A/B/C, no anchor/final | no invariant block, but no reference anchor and nothing implementable — refuse + route |
+| `T2-direction-locked` | **valid** mid-proposal: `[anchor]` + `[proposal]` `[variant]`s, no `[final]` | reference = anchor only; a `[variant]` is not implementable spec |
+| `T4-mirror` | **valid**: T3 + `[mirror]` `[anchor]` baselines (distinct Artifact Names) + `[final]` | mirror-baseline sub-role; extra anchors must not false-block I2 |
+| `V2-pen-index-drift` | **invalid**: `.pen` has two `[final]`, index shows one | cross-check `frames.txt` vs index → block |
 
 ## Fixtures-as-code
 

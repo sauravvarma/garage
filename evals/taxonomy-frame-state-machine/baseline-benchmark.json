@@ -2,53 +2,411 @@
   "metadata": {
     "suite": "taxonomy:frame-state-machine",
     "skill_path": "/Users/sauravvarma/conductor/workspaces/garage/muscat/skills",
-    "skills_under_test": ["design-agent", "code-agent", "visual-qa"],
-    "executor_model": "claude-opus-4-8[1m]",
-    "timestamp": "2026-06-25T16:50:00Z",
-    "run": "20260625-164408",
+    "skills_under_test": [
+      "design-agent",
+      "code-agent",
+      "visual-qa"
+    ],
+    "executor_model": "claude-opus-4-8[1m] (T3,V1) / claude-fable-5[1m] (T1,T2,T4,V2)",
+    "timestamp": "2026-07-07T11:30:00Z",
+    "run": "20260625-164408 + 20260707-110633",
     "fixture": "Streakly (synthetic SvelteKit habit tracker); base + per-snapshot overlay (design/streakly.pen + docs/DESIGN-TAXONOMY.md). .pen fixtures generated headless via fixtures/_lib/pen-build.sh; frame inventory extracted to design/streakly.frames.txt via the Pencil CLI at compose time.",
     "runs_per_case": 1,
     "isolation": "one general-purpose subagent per case, isolated composed workdir, skill read from SKILL.md (loaded plugin not invoked), NO Pencil desktop app / MCP — graders read the markdown index + CLI-extracted frames.txt; no dev server / npm / browser / network",
-    "result": "6/6 cases pass; 17/17 expectations pass",
-    "snapshots_covered": ["T3-shipped (valid)", "V1-double-final (I1 violation)"],
-    "snapshots_pending": ["T1-explore", "T2-direction-locked", "T4-mirror", "V2-pen-index-drift"]
+    "result": "14/14 cases pass; 40/40 expectations pass (T3+V1 from run 20260625-164408 on claude-opus-4-8[1m]; T1+T2+T4+V2 from run 20260707-110633 on claude-fable-5[1m])",
+    "snapshots_covered": [
+      "T3-shipped (valid)",
+      "V1-double-final (I1 violation)",
+      "T1-explore (valid, direction open)",
+      "T2-direction-locked (valid, proposal open)",
+      "T4-mirror (valid, mirror baselines)",
+      "V2-pen-index-drift (.pen/index drift, I1+I4)"
+    ],
+    "snapshots_pending": []
   },
   "runs": [
-    { "case_id": "T3-code-agent-proceeds", "skill": "code-agent", "snapshot": "T3-shipped", "result": {"pass_rate": 1.0, "passed": 3, "failed": 0, "total": 3},
+    {
+      "case_id": "T3-code-agent-proceeds",
+      "skill": "code-agent",
+      "snapshot": "T3-shipped",
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 3,
+        "failed": 0,
+        "total": 3
+      },
       "expectations": [
-        {"text": "Validates I1, finds exactly one [final] (B), does not block", "passed": true, "evidence": "one [final] nQjWk Synced; I1 passes; proceeded"},
-        {"text": "Does not treat [anchor]/[deprecated] as implementable spec", "passed": true, "evidence": "implemented against [final] B only; anchor/deprecated excluded"},
-        {"text": "Proceeds to implement (no taxonomy-invalid refusal)", "passed": true, "evidence": "built /habits store+route+components (6 src files)"}
+        {
+          "text": "Validates I1, finds exactly one [final] (B), does not block",
+          "passed": true,
+          "evidence": "one [final] nQjWk Synced; I1 passes; proceeded"
+        },
+        {
+          "text": "Does not treat [anchor]/[deprecated] as implementable spec",
+          "passed": true,
+          "evidence": "implemented against [final] B only; anchor/deprecated excluded"
+        },
+        {
+          "text": "Proceeds to implement (no taxonomy-invalid refusal)",
+          "passed": true,
+          "evidence": "built /habits store+route+components (6 src files)"
+        }
       ],
-      "notes": "Also held token discipline (added missing --motion-flame, used content-width formula) and synced docs — consistent with code-agent's design-code contract." },
-    { "case_id": "T3-design-agent-references", "skill": "design-agent", "snapshot": "T3-shipped", "result": {"pass_rate": 1.0, "passed": 3, "failed": 0, "total": 3},
+      "notes": "Also held token discipline (added missing --motion-flame, used content-width formula) and synced docs — consistent with code-agent's design-code contract."
+    },
+    {
+      "case_id": "T3-design-agent-references",
+      "skill": "design-agent",
+      "snapshot": "T3-shipped",
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 3,
+        "failed": 0,
+        "total": 3
+      },
       "expectations": [
-        {"text": "Phase 0c passes I1/I2/I3 — no block", "passed": true, "evidence": "1 [final], 1 [anchor], 0 loose candidates; all pass"},
-        {"text": "Identifies [anchor] (Warm Ember) as direction anchor and [final] as pattern source", "passed": true, "evidence": "named both by role; no mirror baseline (not a redesign)"},
-        {"text": "Does not copy content/inventory from reference frames", "passed": true, "evidence": "reference = proportion/feel only; content from docs"}
+        {
+          "text": "Phase 0c passes I1/I2/I3 — no block",
+          "passed": true,
+          "evidence": "1 [final], 1 [anchor], 0 loose candidates; all pass"
+        },
+        {
+          "text": "Identifies [anchor] (Warm Ember) as direction anchor and [final] as pattern source",
+          "passed": true,
+          "evidence": "named both by role; no mirror baseline (not a redesign)"
+        },
+        {
+          "text": "Does not copy content/inventory from reference frames",
+          "passed": true,
+          "evidence": "reference = proportion/feel only; content from docs"
+        }
       ],
-      "notes": "Bonus-correct: flagged that the requested NEW feature has no WEEKLY-STATS-IDEAS.md, so the feature-doc preflight (separate from the invariant gate) would route to /design-explore before Phase 1. Invariant gate itself is green = proceed, as expected." },
-    { "case_id": "T3-visual-qa-baseline", "skill": "visual-qa", "snapshot": "T3-shipped", "result": {"pass_rate": 1.0, "passed": 2, "failed": 0, "total": 2},
+      "notes": "Bonus-correct: flagged that the requested NEW feature has no WEEKLY-STATS-IDEAS.md, so the feature-doc preflight (separate from the invariant gate) would route to /design-explore before Phase 1. Invariant gate itself is green = proceed, as expected."
+    },
+    {
+      "case_id": "T3-visual-qa-baseline",
+      "skill": "visual-qa",
+      "snapshot": "T3-shipped",
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 2,
+        "failed": 0,
+        "total": 2
+      },
       "expectations": [
-        {"text": "Phase 0d validates I1 (one [final]) — no block", "passed": true, "evidence": "one [final]; I1 passes"},
-        {"text": "Picks the [final]+Synced frame as comparison baseline", "passed": true, "evidence": "selected nQjWk (B: Single-column card stack), Synced"}
-      ] },
-    { "case_id": "V1-code-agent-blocks", "skill": "code-agent", "snapshot": "V1-double-final", "result": {"pass_rate": 1.0, "passed": 3, "failed": 0, "total": 3},
+        {
+          "text": "Phase 0d validates I1 (one [final]) — no block",
+          "passed": true,
+          "evidence": "one [final]; I1 passes"
+        },
+        {
+          "text": "Picks the [final]+Synced frame as comparison baseline",
+          "passed": true,
+          "evidence": "selected nQjWk (B: Single-column card stack), Synced"
+        }
+      ]
+    },
+    {
+      "case_id": "V1-code-agent-blocks",
+      "skill": "code-agent",
+      "snapshot": "V1-double-final",
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 3,
+        "failed": 0,
+        "total": 3
+      },
       "expectations": [
-        {"text": "Detects two [final] for Habit Tracker — I1 violation", "passed": true, "evidence": "cited RBqcO (Not started) + C87F8 (Synced); both in index + frames.txt"},
-        {"text": "STOPS and surfaces rather than guessing which [final] is authoritative", "passed": true, "evidence": "refused to act on the 'replace' hint; asked user to resolve"},
-        {"text": "Writes no source files; asks to resolve before implementing", "passed": true, "evidence": "files-modified = none; instructed deprecate the non-current final"}
-      ] },
-    { "case_id": "V1-design-agent-blocks", "skill": "design-agent", "snapshot": "V1-double-final", "result": {"pass_rate": 1.0, "passed": 2, "failed": 0, "total": 2},
+        {
+          "text": "Detects two [final] for Habit Tracker — I1 violation",
+          "passed": true,
+          "evidence": "cited RBqcO (Not started) + C87F8 (Synced); both in index + frames.txt"
+        },
+        {
+          "text": "STOPS and surfaces rather than guessing which [final] is authoritative",
+          "passed": true,
+          "evidence": "refused to act on the 'replace' hint; asked user to resolve"
+        },
+        {
+          "text": "Writes no source files; asks to resolve before implementing",
+          "passed": true,
+          "evidence": "files-modified = none; instructed deprecate the non-current final"
+        }
+      ]
+    },
+    {
+      "case_id": "V1-design-agent-blocks",
+      "skill": "design-agent",
+      "snapshot": "V1-double-final",
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 2,
+        "failed": 0,
+        "total": 2
+      },
       "expectations": [
-        {"text": "Phase 0c invariant check fails on I1 and blocks", "passed": true, "evidence": "two [final] (C87F8/RBqcO); blocked with atomic-promotion explanation"},
-        {"text": "Surfaces invalid state; does not generate variants on top of it", "passed": true, "evidence": "no variants produced; files = none"}
-      ] },
-    { "case_id": "V1-visual-qa-blocks", "skill": "visual-qa", "snapshot": "V1-double-final", "result": {"pass_rate": 1.0, "passed": 2, "failed": 0, "total": 2},
+        {
+          "text": "Phase 0c invariant check fails on I1 and blocks",
+          "passed": true,
+          "evidence": "two [final] (C87F8/RBqcO); blocked with atomic-promotion explanation"
+        },
+        {
+          "text": "Surfaces invalid state; does not generate variants on top of it",
+          "passed": true,
+          "evidence": "no variants produced; files = none"
+        }
+      ]
+    },
+    {
+      "case_id": "V1-visual-qa-blocks",
+      "skill": "visual-qa",
+      "snapshot": "V1-double-final",
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 2,
+        "failed": 0,
+        "total": 2
+      },
       "expectations": [
-        {"text": "Phase 0d detects two [final] and surfaces as a finding", "passed": true, "evidence": "cited both finals + conflicting sync states"},
-        {"text": "Does NOT silently compare against an arbitrary [final]", "passed": true, "evidence": "declined to pick baseline until one is deprecated"}
-      ] }
+        {
+          "text": "Phase 0d detects two [final] and surfaces as a finding",
+          "passed": true,
+          "evidence": "cited both finals + conflicting sync states"
+        },
+        {
+          "text": "Does NOT silently compare against an arbitrary [final]",
+          "passed": true,
+          "evidence": "declined to pick baseline until one is deprecated"
+        }
+      ]
+    },
+    {
+      "case_id": "T1-design-agent-routes",
+      "skill": "design-agent",
+      "snapshot": "T1-explore",
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 3,
+        "failed": 0,
+        "total": 3
+      },
+      "expectations": [
+        {
+          "text": "Does NOT report an invariant violation — I1/I2/I3 all hold",
+          "passed": true,
+          "evidence": "ran I1-I4, all PASS (I1/I2 vacuous, concepts inside dated [explore] group); explicitly stated the block is a state-machine position, not an invariant violation"
+        },
+        {
+          "text": "Recognizes there is no [anchor] and refuses to generate production variants",
+          "passed": true,
+          "evidence": "cited open [explore] group (3 live [concept]s, no [anchor] winner) + missing 'Direction chosen' entry; generated nothing"
+        },
+        {
+          "text": "Routes to /design-explore; does not promote a [concept] itself",
+          "passed": true,
+          "evidence": "routed to /design-explore; explicitly declined to guess the winner or perform the promotion; also surfaced the DESIGN-HEURISTICS-prose vs frame-state conflict instead of resolving it"
+        }
+      ],
+      "notes": "Model behavior: treated the taxonomy as valid-but-positioned-before-the-direction-decision, exactly the T1 distinction (refuse+route, not invariant-block). Files modified: none."
+    },
+    {
+      "case_id": "T1-code-agent-refuses",
+      "skill": "code-agent",
+      "snapshot": "T1-explore",
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 3,
+        "failed": 0,
+        "total": 3
+      },
+      "expectations": [
+        {
+          "text": "Finds no [final] frame — nothing is implementable spec",
+          "passed": true,
+          "evidence": "I1 pass vacuously (zero [final]); stated no implementable spec exists"
+        },
+        {
+          "text": "Does NOT implement from a [concept] or the IDEAS doc alone",
+          "passed": true,
+          "evidence": "concepts treated only as evidence of the open decision; files modified: none"
+        },
+        {
+          "text": "Surfaces the state and routes forward rather than guessing",
+          "passed": true,
+          "evidence": "3-step route: /design-explore (direction) then /design-agent (variants->final) then /code-agent"
+        }
+      ],
+      "notes": "Also surfaced the DESIGN-HEURISTICS vs frame-state contradiction as a flag rather than resolving by guess. Files modified: none."
+    },
+    {
+      "case_id": "T2-design-agent-anchor-reference",
+      "skill": "design-agent",
+      "snapshot": "T2-direction-locked",
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 3,
+        "failed": 0,
+        "total": 3
+      },
+      "expectations": [
+        {
+          "text": "Phase 0c passes — I1/I2/I3 hold (no [final] is not a violation)",
+          "passed": true,
+          "evidence": "all four invariants PASS (I1 vacuous, one anchor, variants inside dated [proposal]); proceeded, no block"
+        },
+        {
+          "text": "Uses the [anchor] (Warm Ember) as the direction anchor; no pattern source exists",
+          "passed": true,
+          "evidence": "reference set = anchor q6rVI only (feel); pattern-source sub-role explicitly noted vacant (zero [final] in file), composition grounded in the locked decision table"
+        },
+        {
+          "text": "Does NOT treat any open [variant] as a reference or approved spec",
+          "passed": true,
+          "evidence": "variants A/B/C explicitly excluded (open candidates, non-terminal, never reference-role); deprecated frames excluded as rejected history"
+        }
+      ],
+      "notes": "CASE REVISED before this run: the original prompt (new weekly-stats feature) blocked at the skill's doc gate (no WEEKLY-STATS-IDEAS.md) before ever reaching Phase 0c — a doc-gate artifact, not taxonomy behavior. Re-pointed at the open Habit Tracker [proposal]; the executor correctly added variant D INSIDE the existing dated proposal group (kept one decision set) and stopped before promotion. Files modified: none."
+    },
+    {
+      "case_id": "T2-code-agent-refuses",
+      "skill": "code-agent",
+      "snapshot": "T2-direction-locked",
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 3,
+        "failed": 0,
+        "total": 3
+      },
+      "expectations": [
+        {
+          "text": "Finds three open [variant] candidates and no [final] — composition decision unresolved",
+          "passed": true,
+          "evidence": "named the open [proposal] 2026-05-25 with variants A/B/C; I1 pass vacuously, one anchor, I3/I4 pass"
+        },
+        {
+          "text": "Does NOT pick a [variant] to implement (not even the eventual winner B)",
+          "passed": true,
+          "evidence": "no frame consumed as spec; files modified: none"
+        },
+        {
+          "text": "Asks for the composition decision (atomic promotion to [final]) before implementing",
+          "passed": true,
+          "evidence": "routed to /design-agent to resolve the variant pick + atomic promotion, then return to /code-agent; correctly used the lock-state hierarchy (direction locked via heuristics+anchor, open decision is variant-level)"
+        }
+      ],
+      "notes": "Also caught the IDEAS-doc 'locked' rows contradicting the comp's open proposal and surfaced it. Files modified: none."
+    },
+    {
+      "case_id": "T4-code-agent-proceeds",
+      "skill": "code-agent",
+      "snapshot": "T4-mirror",
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 3,
+        "failed": 0,
+        "total": 3
+      },
+      "expectations": [
+        {
+          "text": "Validates I1/I2 and does NOT block — three [anchor] frames with distinct Artifact Names satisfy I2",
+          "passed": true,
+          "evidence": "I1 pass (single [final] K8IFwN); I2 pass with explicit reasoning: mirror anchors are one-per-shipped-state under distinct Artifact Names, so no two anchors compete"
+        },
+        {
+          "text": "Implements against the single [final], not the [mirror] [anchor] captures",
+          "passed": true,
+          "evidence": "spec = [final] B: Single-column card stack only; mirror captures + direction anchor treated as read-only reference grounding, content from docs"
+        },
+        {
+          "text": "Proceeds (produces a plan / code, no taxonomy refusal)",
+          "passed": true,
+          "evidence": "implemented 6 src files (store, route, 3 components, icon) + token drift fix + doc sync; declared smoke-test not run as a caveat instead of claiming success"
+        }
+      ],
+      "notes": "Negative control with extra anchors present: no false I2 block. Also held token discipline and the design-code contract (COMPONENT-SPECS + taxonomy sync note updated)."
+    },
+    {
+      "case_id": "T4-design-agent-mirror-baseline",
+      "skill": "design-agent",
+      "snapshot": "T4-mirror",
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 3,
+        "failed": 0,
+        "total": 3
+      },
+      "expectations": [
+        {
+          "text": "Phase 0c passes I1-I3 (one [final], anchors under distinct Artifact Names, candidates in dated groups)",
+          "passed": true,
+          "evidence": "I1-I4 all PASS; called I2 'the pivotal call' and resolved it via per-Artifact-Name scoping matching the mirror naming convention"
+        },
+        {
+          "text": "Distinguishes the three reference sub-roles",
+          "passed": true,
+          "evidence": "explicit table: Warm Ember = direction anchor; [final] B = pattern source; both [mirror] captures (Default + Empty state) = mirror baselines for the redesign"
+        },
+        {
+          "text": "Treats mirror [anchor]s as grounding only — not implementable, no content copying",
+          "passed": true,
+          "evidence": "mirrors used as as-shipped baseline for measurement; inventory from IDEAS doc, tokens from DESIGN-TOKENS; no copy-and-rearrange, no promotion of mirrors"
+        }
+      ],
+      "notes": "Described 3 redesign variants in a new dated [proposal] group and stopped awaiting the human pick, noting promotion would deprecate the current [final] under I1. Files modified: docs/HABIT-TRACKER-IDEAS.md (design-rationale section only)."
+    },
+    {
+      "case_id": "V2-code-agent-blocks",
+      "skill": "code-agent",
+      "snapshot": "V2-pen-index-drift",
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 3,
+        "failed": 0,
+        "total": 3
+      },
+      "expectations": [
+        {
+          "text": "Cross-checks the .pen inventory (frames.txt) against the artifact index — does not trust the index alone",
+          "passed": true,
+          "evidence": "read frames.txt and diffed it row-by-row against the index; found the single drifted row (KTDrB)"
+        },
+        {
+          "text": "Detects the drift: [final] A: Two-pane split in the .pen vs [deprecated] in the index — I1 violated",
+          "passed": true,
+          "evidence": "cited I1 FAIL (two [final] for Habit Tracker) AND I4 FAIL (terminal [deprecated]->[final] relabel outside the audited Pivot path); diagnosed a hand-rename that skipped atomic promotion"
+        },
+        {
+          "text": "STOPS and surfaces; writes no source files and does not pick a [final]",
+          "passed": true,
+          "evidence": "blocked; explicitly refused to treat the index-suggested B as authoritative; files modified: none"
+        }
+      ],
+      "notes": "The index alone looks valid — the block came entirely from the cross-check, which is what V2 guards."
+    },
+    {
+      "case_id": "V2-visual-qa-blocks",
+      "skill": "visual-qa",
+      "snapshot": "V2-pen-index-drift",
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 2,
+        "failed": 0,
+        "total": 2
+      },
+      "expectations": [
+        {
+          "text": "Phase 0d cross-checks frames.txt against the index and detects two [final] where the index shows one",
+          "passed": true,
+          "evidence": "I1 FAIL on the inventory; per-row cross-check isolated KTDrB (A: Two-pane split) as [deprecated] in the index but [final] in the file; all other rows matched"
+        },
+        {
+          "text": "Surfaces the drift as a finding instead of silently comparing against either [final]",
+          "passed": true,
+          "evidence": "refused to pick a baseline (comparing against L8rvtM would 'paper over the invalid file state'); reported blocking finding + fix path (relabel via audit-trailed op, or legal re-open via /design-explore Mode 5)"
+        }
+      ],
+      "notes": "Blocked before Phase 0e; no checklist file written; files modified: none."
+    }
   ],
   "findings": [],
   "notes": "First baseline for the taxonomy suite. Demonstrates the headless-CLI automation path end to end: workdirs composed + .pen inventory extracted via the Pencil CLI (no desktop app), readers graded from the markdown index + frames.txt. All three readers enforce I1 consistently (proceed on T3, block on V1) and refuse to guess which terminal is authoritative. Extend with T1/T2/T4 (valid lifecycle stages) and V2 (.pen-vs-index drift) next."

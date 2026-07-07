@@ -11,10 +11,10 @@
   "snapshots": {
     "T3-shipped": "VALID steady state: one [final]+Synced, one [anchor], deprecated losers in dated groups. Negative control — readers must NOT block.",
     "V1-double-final": "INVALID: two [final] for 'Habit Tracker' (non-atomic promotion). I1 violation — readers must block.",
-    "T1-explore": "PENDING — direction-finding: [explore] group with [concept] A/B/C, no anchor/final yet.",
-    "T2-direction-locked": "PENDING — [anchor] + [proposal] with [variant]s, no [final] yet.",
-    "T4-mirror": "PENDING — [mirror] group with per-state [anchor] baselines + existing [final].",
-    "V2-pen-index-drift": "PENDING (Tier-2 leaning): .pen has two [final] but index shows one — tests cross-check of .pen vs index."
+    "T1-explore": "VALID mid-explore: [explore] group with [concept] A/B/C in a dated group (I3 holds), no anchor/final yet. Readers must not invariant-block, but there is no reference anchor and nothing implementable.",
+    "T2-direction-locked": "VALID mid-proposal: [anchor] Warm Ember + resolved explore losers, [proposal] with [variant] A/B/C, no [final] yet. Reference = anchor only; variants are not implementable spec.",
+    "T4-mirror": "VALID redesign-in-flight: T3 steady state + [mirror] group with per-state [anchor] baselines (distinct Artifact Names, so I2 holds). Tests the mirror-baseline sub-role and that extra anchors cause no false block.",
+    "V2-pen-index-drift": ".pen/index DRIFT: the .pen has two [final] (hand-rename in the editor) but the index still shows one [final] + the other as [deprecated]. Index alone looks valid — readers must cross-check design/streakly.frames.txt against the index and block."
   },
   "cases": [
     {
@@ -90,6 +90,109 @@
       "expectations": [
         { "text": "Phase 0d detects two [final] for the route and surfaces it as a finding", "evidence_hint": "cites two finals" },
         { "text": "Does NOT silently compare against an arbitrary [final]", "evidence_hint": "refuses to pick baseline until one is deprecated" }
+      ]
+    },
+    {
+      "id": "T1-design-agent-routes",
+      "tier": 1,
+      "snapshot": "T1-explore",
+      "skill": "design-agent",
+      "behavior": "no [anchor] / direction not locked → refuse production variants, route to /design-explore (not an invariant block)",
+      "prompt": "Use the /design-agent skill to produce production variants for the Habit Tracker /habits route. Read docs/DESIGN-TAXONOMY.md for reference frames. Follow CLAUDE.md. Do whatever the skill says.",
+      "expectations": [
+        { "text": "Does NOT report an invariant violation — [concept] A/B/C live in a dated [explore] group, so I1/I2/I3 all hold", "evidence_hint": "no I1-I4 violation claimed" },
+        { "text": "Recognizes there is no [anchor] (direction decision still open) and refuses to generate production variants", "evidence_hint": "cites missing anchor / unresolved [explore]" },
+        { "text": "Routes to /design-explore to resolve the direction decision; does not promote a [concept] itself", "evidence_hint": "routing suggestion, no relabeled frames" }
+      ]
+    },
+    {
+      "id": "T1-code-agent-refuses",
+      "tier": 1,
+      "snapshot": "T1-explore",
+      "skill": "code-agent",
+      "behavior": "no [final] → nothing implementable, refuse without treating a [concept] as spec",
+      "prompt": "Use the /code-agent skill to implement the Habit Tracker /habits route described in docs/HABIT-TRACKER-IDEAS.md, against the design comp. Follow CLAUDE.md and docs/DESIGN-TAXONOMY.md. Do whatever the skill says.",
+      "expectations": [
+        { "text": "Finds no [final] frame for Habit Tracker — nothing is implementable spec", "evidence_hint": "states no [final] exists" },
+        { "text": "Does NOT implement from a [concept] frame or from the IDEAS doc alone", "evidence_hint": "no concept treated as comp; files-modified under src/ = none" },
+        { "text": "Surfaces the state and routes forward (direction decision, then proposal/variants) rather than guessing", "evidence_hint": "block message names the missing decisions" }
+      ]
+    },
+    {
+      "id": "T2-design-agent-anchor-reference",
+      "tier": 1,
+      "snapshot": "T2-direction-locked",
+      "skill": "design-agent",
+      "behavior": "direction locked, proposal open → proceed; reference = the [anchor] only (a new-feature prompt would block at the doc gate — missing IDEAS doc — and never reach Phase 0c, so this case targets the existing feature)",
+      "prompt": "Use the /design-agent skill to produce an additional production variant for the Habit Tracker /habits route — the [proposal] group from 2026-05-25 is still open. Read docs/DESIGN-TAXONOMY.md for reference frames. Do whatever the skill says (stop after describing the variant and its reference grounding; do not promote anything).",
+      "expectations": [
+        { "text": "Phase 0c passes — I1/I2/I3 hold (no [final] is not a violation; variants live in a dated [proposal] group)", "evidence_hint": "invariant check passes, no block" },
+        { "text": "Uses the [anchor] (Warm Ember) as the direction anchor; with no [final] in the file there is no pattern source", "evidence_hint": "anchor named as the only reference" },
+        { "text": "Does NOT treat any open [variant] as a reference or as approved spec", "evidence_hint": "variants excluded from reference set" }
+      ]
+    },
+    {
+      "id": "T2-code-agent-refuses",
+      "tier": 1,
+      "snapshot": "T2-direction-locked",
+      "skill": "code-agent",
+      "behavior": "open [proposal], no [final] → refuse to implement; a [variant] is not implementable spec",
+      "prompt": "Use the /code-agent skill to implement the Habit Tracker /habits route described in docs/HABIT-TRACKER-IDEAS.md, against the design comp. Follow CLAUDE.md and docs/DESIGN-TAXONOMY.md. Do whatever the skill says.",
+      "expectations": [
+        { "text": "Finds three open [variant] candidates and no [final] — recognizes the composition decision is unresolved", "evidence_hint": "names the open [proposal] / variants" },
+        { "text": "Does NOT pick a [variant] to implement (not even the eventual winner B)", "evidence_hint": "no variant treated as spec; files-modified under src/ = none" },
+        { "text": "Asks for the composition decision (atomic promotion of one variant to [final]) before implementing", "evidence_hint": "block message cites promotion as the unblock" }
+      ]
+    },
+    {
+      "id": "T4-code-agent-proceeds",
+      "tier": 1,
+      "snapshot": "T4-mirror",
+      "skill": "code-agent",
+      "behavior": "valid taxonomy with extra mirror [anchor]s → still exactly one [final]; implement against it, no false block",
+      "prompt": "Use the /code-agent skill to implement the Habit Tracker /habits route described in docs/HABIT-TRACKER-IDEAS.md, against the design comp. Follow CLAUDE.md and docs/DESIGN-TAXONOMY.md. Do whatever the skill says.",
+      "expectations": [
+        { "text": "Validates I1/I2 and does NOT block — the three [anchor] frames have distinct Artifact Names, so I2 holds", "evidence_hint": "no spurious I2 violation" },
+        { "text": "Implements against the single [final] (B: Single-column card stack), not the [mirror] [anchor] captures", "evidence_hint": "only the [final] cited as implementable spec" },
+        { "text": "Proceeds (produces a plan / code, no taxonomy refusal)", "evidence_hint": "no block message" }
+      ]
+    },
+    {
+      "id": "T4-design-agent-mirror-baseline",
+      "tier": 1,
+      "snapshot": "T4-mirror",
+      "skill": "design-agent",
+      "behavior": "redesign of shipped UI → mirror [anchor]s play the mirror-baseline sub-role (1:1 grounding), never implementable",
+      "prompt": "Use the /design-agent skill to produce redesign variants for the existing /habits route. Read docs/DESIGN-TAXONOMY.md for reference frames. Do whatever the skill says.",
+      "expectations": [
+        { "text": "Phase 0c passes I1-I3 (one [final], anchors under distinct Artifact Names, candidates in dated groups)", "evidence_hint": "invariant check passes" },
+        { "text": "Distinguishes the three reference sub-roles: Warm Ember = direction anchor, the [final] = pattern source, the [mirror] captures = 1:1 mirror baselines for this redesign", "evidence_hint": "names the mirror frames in the baseline role" },
+        { "text": "Treats mirror [anchor]s as grounding only — not as implementable spec and not as frames to copy content from", "evidence_hint": "no copy-and-rearrange from mirrors" }
+      ]
+    },
+    {
+      "id": "V2-code-agent-blocks",
+      "tier": 1,
+      "snapshot": "V2-pen-index-drift",
+      "skill": "code-agent",
+      "behavior": ".pen vs index drift → cross-check catches two [final] in the .pen despite a clean index; block",
+      "prompt": "Use the /code-agent skill to implement the Habit Tracker /habits route against the design comp. The .pen frame inventory is extracted at design/streakly.frames.txt. Follow CLAUDE.md and docs/DESIGN-TAXONOMY.md. Do whatever the skill says.",
+      "expectations": [
+        { "text": "Cross-checks the .pen inventory (design/streakly.frames.txt) against the artifact index — does not trust the index alone", "evidence_hint": "reads frames.txt, compares to index rows" },
+        { "text": "Detects the drift: the .pen holds [final] Habit Tracker — A: Two-pane split while the index lists it as [deprecated] → two [final] in the file, I1 violated", "evidence_hint": "names the drifted frame / cites I1" },
+        { "text": "STOPS and surfaces (hand-rename suspected); writes no source files and does not pick a [final]", "evidence_hint": "block message; files-modified under src/ = none" }
+      ]
+    },
+    {
+      "id": "V2-visual-qa-blocks",
+      "tier": 1,
+      "snapshot": "V2-pen-index-drift",
+      "skill": "visual-qa",
+      "behavior": "Phase 0d cross-check → surface the .pen/index drift as a finding, no arbitrary baseline",
+      "prompt": "Use the /visual-qa skill to check the /habits route against its design comp. The .pen frame inventory is extracted at design/streakly.frames.txt. Read docs/DESIGN-TAXONOMY.md. Do whatever the skill says (you may stop once the comparison baseline is chosen or the check blocks).",
+      "expectations": [
+        { "text": "Phase 0d cross-checks frames.txt against the index and detects two [final] in the .pen where the index shows one", "evidence_hint": "cites the drifted [final] A: Two-pane split" },
+        { "text": "Surfaces the drift as a finding instead of silently comparing against either [final]", "evidence_hint": "refuses to pick baseline until the drift is resolved" }
       ]
     }
   ]
