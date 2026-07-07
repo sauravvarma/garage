@@ -27,6 +27,14 @@ evals/
       states/*.md                         ← IDEAS-doc overlays; the ONLY variable per case
       ports/HabitTrackerLegacy.jsx        ← legacy source for the port cases
     runs/                                 ← gitignored; prepared workdirs + benchmark.json land here
+  taxonomy-frame-state-machine/           ← DESIGN-TAXONOMY frame-state-machine readers under test
+    cases.json                            ← reader × snapshot → expected proceed/block (14 cases)
+    run-taxonomy-suite.sh                 ← composes workdirs + extracts .pen frame inventory via Pencil CLI
+    fixtures/
+      _lib/pen-build.sh                   ← headless .pen authoring helper (fixtures-as-code)
+      base/                               ← shared Streakly project (locked IDEAS doc; taxonomy is the only variable)
+      snapshots/<id>/                     ← build/*.build.txt → generated design/streakly.pen + docs index
+    runs/                                 ← gitignored
 ```
 
 The fixture model is **base + overlay**: every case is the same `base/` project with exactly one `states/*.md` copied to `docs/HABIT-TRACKER-IDEAS.md`. To see what an agent was given for a case, diff that one file. The base API (`src/lib/api/habits.ts`) deliberately implies 5+ branches (401/403/409/500 + empty) — that's what makes the "inadequate page states" cases bite.
@@ -60,9 +68,10 @@ The fixture model is **base + overlay**: every case is the same `base/` project 
 | Run | Date | Pass rate | Notes |
 | --- | --- | --- | --- |
 | baseline | 2026-05-27 | 10/10 cases · 40/40 checks | Green on behavior. Surfaced **F1** (medium): spec-research emits inconsistent Status tokens (`proposed`/`shipped`/`draft`) for unlocked rows; template vocabulary disagrees with code-agent's gate. See `handoff-spec-research--code-agent/baseline-benchmark.json` → `findings`. |
+| taxonomy baseline | 2026-07-07 | 14/14 cases · 40/40 expectations | All six lifecycle snapshots (T1/T2/T3/T4 valid states + V1/V2 violations) across `design-agent` / `code-agent` / `visual-qa`. See `taxonomy-frame-state-machine/baseline-benchmark.json`. |
 
 The committed reference baseline lives at `handoff-spec-research--code-agent/baseline-benchmark.json` (same shape as `skills-workspace/iteration-*/benchmark.json`). Re-run and compare against it after touching either skill; raw per-run output goes to the gitignored `runs/`.
 
 ## Extending to other handoffs
 
-This directory covers spec-research ↔ code-agent. Add sibling directories for the other pipeline seams as they're prioritized — e.g. `handoff-design-agent--code-agent/`, `handoff-code-agent--visual-qa/` — reusing the same base+overlay + `run-*.sh` pattern. Keep one shared synthetic project per handoff so fixtures stay diffable.
+This directory covers spec-research ↔ code-agent (`handoff-…`) and the DESIGN-TAXONOMY frame-state-machine readers (`taxonomy-…`). Add sibling directories for the other pipeline seams as they're prioritized — e.g. `handoff-design-agent--code-agent/`, `handoff-code-agent--visual-qa/` — reusing the same base+overlay + `run-*.sh` pattern. Keep one shared synthetic project per handoff so fixtures stay diffable.
