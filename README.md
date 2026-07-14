@@ -20,7 +20,7 @@ Each skill owns one slice of the lifecycle. They cooperate through hard prefligh
 | `/code-agent` | Implement | Code (refuses on open decisions or thin spec — routes to `/spec-research`) |
 | `/visual-qa` | Verify | `.claude/visual-qa-checklist.md`, spec-vs-rendered-code reports (matrix over states × breakpoints × engines) |
 
-Read [PHILOSOPHY.md](./PHILOSOPHY.md) for the beliefs and contracts that drive the design.
+Read [PHILOSOPHY.md](./PHILOSOPHY.md) for the beliefs and contracts that drive the design, and [EXAMPLES.md](./EXAMPLES.md) for worked scenarios showing the lifecycle, shared spine, and handoffs in action.
 
 ## Prerequisites
 
@@ -28,7 +28,7 @@ Read [PHILOSOPHY.md](./PHILOSOPHY.md) for the beliefs and contracts that drive t
 - **Pencil MCP** — required for `design-explore` and `design-agent`. The other three skills work without it.
 - **Playwright** — required for `visual-qa`. One-time project setup; the skill deliberately doesn't auto-install (was npm-coupled, broke on pnpm/yarn/bun/Python/Go projects). When `visual-qa` runs and Playwright is missing, it tells you exactly what to install.
 
-The pod has no other runtime dependencies. Skills are pure markdown + small reference files; the only executable code in the skills themselves is `visual-qa/scripts/capture.js` (a 35-line Playwright wrapper). The dev-only eval suite under `evals/` ships a bash runner that never calls an LLM.
+The pod has no other runtime dependencies. Skills are pure markdown + small reference files; the only executable code in the skills themselves is a handful of small helpers — `visual-qa/scripts/capture.js` (a Playwright wrapper) and `design-agent/scripts/` (`extract-mock-assets.py` + `extract-icon-paths.js`, used only by mirror mode). The dev-only eval suite under `evals/` ships a bash runner that never calls an LLM.
 
 ## Install
 

@@ -85,13 +85,13 @@ If the project has no formal token doc, do a quick scan of the SCSS/styled-compo
 
 When the shipped UI uses real images and real SVG icons, mirror them faithfully. Don't draw approximations.
 
-For images (photos, illustrations, body-system icons): pull URLs from the source-of-truth (mock JSON, API responses, CMS), download them via `~/vault/tools/scripts/extract-mock-assets.py` to `design/assets/`, and reference via image fills:
+For images (photos, illustrations, body-system icons): pull URLs from the source-of-truth (mock JSON, API responses, CMS), download them via `python3 scripts/extract-mock-assets.py` (bundled in this skill's `scripts/` dir) to `design/assets/`, and reference via image fills:
 
 ```js
 fill: { type: "image", url: "./assets/heart-health.png", mode: "fit" }
 ```
 
-For SVG icons defined in the React/Vue/etc component source: extract the `geometry`, `viewBox`, `strokeWidth`, and stroke caps/joins via `~/vault/tools/scripts/extract-icon-paths.js`, and create reusable icon components in Pencil:
+For SVG icons defined in the React/Vue/etc component source: extract the `geometry`, `viewBox`, `strokeWidth`, and stroke caps/joins via `node scripts/extract-icon-paths.js` (bundled in this skill's `scripts/` dir), and create reusable icon components in Pencil:
 
 ```js
 // One-time definition, reusable

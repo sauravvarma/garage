@@ -21,3 +21,7 @@ evals/**/runs/
 
 # Scratch .pen used to validate the headless-authoring workflow; not a fixture.
 /eval.pen
+
+# Python bytecode
+__pycache__/
+*.pyc

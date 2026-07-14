@@ -427,7 +427,7 @@ Mirror mode is a strict five-step pipeline. Each step has a hard exit if its pre
 2. Icon catalog: every inline `<svg>` and Icon-component definition in the component or icon module, with `geometry`, `viewBox`, `strokeWidth`, caps/joins.
 3. Asset list: every URL-shaped string in the mock JSON, with the semantic name (e.g. body-system "Heart Health" → its `image_url`).
 
-Run `~/vault/tools/scripts/extract-mock-assets.py <mock-path> <out-dir>` to download all assets to `design/assets/`. Run `~/vault/tools/scripts/extract-icon-paths.js <icon-module>` to dump the icon catalog as JSON.
+Run `python3 scripts/extract-mock-assets.py <mock-path> <out-dir>` (resolved from this skill's directory) to download all assets to `design/assets/`. Run `node scripts/extract-icon-paths.js <icon-module>` to dump the icon catalog as JSON.
 
 **Step 2 — Tokens.** Declare every token from the inventory as a Pencil `variables` entry in the `.pen` file. Use `$`-prefixed references everywhere downstream (per `pencil-hygiene.md` rule 4).
 

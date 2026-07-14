@@ -118,7 +118,7 @@ Both are explicit opt-ins. The default is always: missing inputs → block.
 
 | Artifact | Created by | Updated by | Read by |
 |---|---|---|---|
-| `CLAUDE.md` | `spec-first` | `spec-first` (re-runs append) | all four downstream |
+| `CLAUDE.md` | `spec-first` | `spec-first` (re-runs append) | all five downstream |
 | `docs/REPO-CONVENTIONS.md` | `spec-first` | manual + `spec-first` re-runs | `code-agent` |
 | `docs/COMPONENT-SPECS.md` | `spec-first` | `code-agent` (when adding atoms) | `code-agent` |
 | `docs/BRIEF-AND-DIRECTION.md` | `spec-first` | manual | `design-explore`, `design-agent` |
