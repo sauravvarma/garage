@@ -1,0 +1,76 @@
+# Keeps the vault's submodule pointer for this repo on main.
+#
+# On every push to main, checks out the vault (without initialising any
+# submodules, so no extra clone traffic) and moves this repo's gitlink to the
+# pushed commit via update-index. Opens or refreshes a PR against the vault;
+# the vault's own protection rules gate the merge.
+#
+# Needs a VAULT_PAT secret: a fine-grained token scoped to sauravvarma/vault
+# with Contents and Pull requests set to read/write.
+
+name: Bump vault submodule pointer
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: bump-vault-pointer
+  cancel-in-progress: true
+
+permissions: {}
+
+jobs:
+  bump:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check out vault (no submodules)
+        uses: actions/checkout@v4
+        with:
+          repository: sauravvarma/vault
+          token: ${{ secrets.VAULT_PAT }}
+          fetch-depth: 1
+          submodules: false
+
+      - name: Point the gitlink at this commit and open a PR
+        env:
+          SUBMODULE_PATH: tools/skill-packages/garage
+          SHA: ${{ github.sha }}
+          SOURCE_REPO: ${{ github.repository }}
+          HEAD_MESSAGE: ${{ github.event.head_commit.message }}
+          GH_TOKEN: ${{ secrets.VAULT_PAT }}
+        run: |
+          set -euo pipefail
+
+          current="$(git ls-tree HEAD "$SUBMODULE_PATH" | awk '{print $3}')"
+          if [ "$current" = "$SHA" ]; then
+            echo "vault already points $SUBMODULE_PATH at $SHA; nothing to do"
+            exit 0
+          fi
+
+          name="$(basename "$SUBMODULE_PATH")"
+          short="${SHA:0:7}"
+          branch="bump/${name}"
+          title="submodules: bump ${name} to ${short}"
+          summary="$(printf '%s' "$HEAD_MESSAGE" | head -n1)"
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git checkout -B "$branch"
+          git update-index --cacheinfo "160000,${SHA},${SUBMODULE_PATH}"
+          git commit -m "$title" -m "Source: ${SOURCE_REPO}@${short}" -m "$summary"
+          git push --force origin "$branch"
+
+          state="$(gh pr view "$branch" --repo sauravvarma/vault --json state -q .state 2>/dev/null || true)"
+          if [ "$state" = "OPEN" ]; then
+            echo "PR for $branch already open; branch force-updated"
+            exit 0
+          fi
+
+          gh pr create --repo sauravvarma/vault --base main --head "$branch" \
+            --title "$title" \
+            --body "$(printf 'Moves the %s gitlink to %s@%s.\n\nMain commit: %s\n\nOpened automatically by the bump-vault-pointer workflow in %s.' \
+              "$name" "$SOURCE_REPO" "$short" "$summary" "$SOURCE_REPO")"
